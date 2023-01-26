@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.typelevel:simulacrum-scalafix-annotations_2.13:0.5.4">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/typelevel/simulacrum-scalafix-annotations_2.13/0.5.4/simulacrum-scalafix-annotations_2.13-0.5.4.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/typelevel/simulacrum-scalafix-annotations_2.13/0.5.4/simulacrum-scalafix-annotations_2.13-0.5.4-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/typelevel/simulacrum-scalafix-annotations_2.13/0.5.4/simulacrum-scalafix-annotations_2.13-0.5.4-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
