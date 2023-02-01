@@ -62,7 +62,10 @@ object Main {
                 case Some(tokenFound) => tokenFound
                 case _ =>
                   users.find(x => x.login == login && x.password == pass) match {
-                    case Some(userFound) => userFound.copy(token = UUID.randomUUID().toString)
+                    case Some(userFound) =>
+                      val user = userFound.copy(token = UUID.randomUUID().toString)
+                      Await.result(userTokensCollection.insertOne(user).toFuture(), Duration(30, SECONDS))
+                      user
                     case _ => errorUser
                   }
               }
@@ -102,7 +105,7 @@ object Main {
               DBManager.GetMongoConnection() match {
                 case Some(mongo) =>
                   val posts: MongoCollection[Post] = mongo.getCollection("posts")
-                  Await.result(posts.insertOne(post).toFuture(), Duration(30, SECONDS))
+                  Await.result(posts.insertOne(post.copy(id = UUID.randomUUID().toString)).toFuture(), Duration(30, SECONDS))
                 case _ =>
               }
             case Left(value) =>
