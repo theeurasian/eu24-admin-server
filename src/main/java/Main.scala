@@ -32,7 +32,7 @@ object Main {
   val restUrl: String = url + ":" + port
   val cloudDirectory = "C:/files"
   val botApi = "5770042739:AAEEb_lkqyKvQjZbtOWF2SZwAn732rM4cnw"
-  val chatId = 1001823572552
+  val chatId = "-1001823572552"
 
   val users: List[UserAuth] = List(
     UserAuth("editor", "TheEurasian124578editor", "create"),
@@ -140,9 +140,9 @@ object Main {
 
                   val request: Request[String, Any] = basicRequest
                     .response(asStringAlways)
-                    .post(uri"https://api.telegram.org/bot$botApi/sendPhoto?chat_id?=-$chatId&parse_mode=HTML&caption=$text&photo=$photo")
+                    .post(uri"https://api.telegram.org/bot$botApi/sendPhoto?chat_id?=$chatId&parse_mode=HTML&caption=$text&photo=$photo")
 
-                  val response: Response[Either[String, String]] = client.send(request)
+                  val response = client.send(request)
 
                   val res = response
 
