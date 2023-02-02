@@ -17,22 +17,23 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
 import org.mongodb.scala.model.Filters.{and, equal}
-import sttp.client3.SimpleHttpClient
-import sttp.client3.{Request, Response, SimpleHttpClient, UriContext, asStringAlways, basicRequest}
-import java.io.File
+import sttp.client3.{Request, Response, SimpleHttpClient, UriContext, asStringAlways, basicRequest, multipart, multipartFile}
+
+import java.io.{File, FileInputStream}
 import java.util.{Date, UUID}
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
-import scala.io.StdIn
+import scala.io.{Source, StdIn}
 
 object Main {
 
-  val url = "http://localhost"
-  val port = "8080"
+  val ip = "10.70.0.100"
+  val url = "http://188.242.27.197"
+  val port = "5055"
   val restUrl: String = url + ":" + port
   val cloudDirectory = "C:/files"
-  val botApi = "5770042739:AAEEb_lkqyKvQjZbtOWF2SZwAn732rM4cnw"
-  val chatId = "-1001823572552"
+  val botApi = "5912354671:AAG5R1ZuEijhqKLhP6X5QoYQAb_S4_BBmz0"
+  val chatId = "-1001265788563"
 
   val users: List[UserAuth] = List(
     UserAuth("editor", "TheEurasian124578editor", "create"),
@@ -40,7 +41,7 @@ object Main {
   )
 
   case class UserAuth(login: String, password: String, permissions: String, token: String = "")
-  case class Post(id: String, date: Long, header: String, url: String, imageUrl: String, caption: String, publish: String = "new")
+  case class Post(id: String, date: Long, header: String, url: String, imageUrl: String, publish: String = "new")
 
   def main(args: Array[String]): Unit = {
     implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "http")
@@ -136,24 +137,19 @@ object Main {
                 if (posts.nonEmpty){
 
                   val post = posts.head
-                  val caption = post.caption
-                  val url = s"<a href=\"${post.url}\">${post.url}</a>"
-                  val text = caption + " " + url
-                  val photo = post.imageUrl
+                  val postUrl = s"<a href=\"${post.url}\">${post.url}</a>"
+                  val text = post.header + " " + postUrl
 
+                  val filePath = post.imageUrl.replace(url + ":" + port + "/files", cloudDirectory)
                   val request: Request[String, Any] = basicRequest
                     .response(asStringAlways)
-                    .post(uri"https://api.telegram.org/bot$botApi/sendPhoto?chat_id?=$chatId&parse_mode=HTML&caption=$text&photo=$photo")
-
+                    .multipartBody(multipartFile("photo", new File(filePath)))
+                    .post(uri"https://api.telegram.org/bot$botApi/sendPhoto?chat_id=$chatId&parse_mode=HTML&caption=$text")
                   val response = client.send(request)
-
                   val res = response
 
+
                 }
-
-
-
-
               case _ => List.empty[Post]
             }
           }
@@ -168,7 +164,7 @@ object Main {
       )
     }
 
-    val bindingFuture = Http().newServerAt("localhost", 8080).bind(route)
+    val bindingFuture = Http().newServerAt(ip, port.toInt).bind(route)
 
     StdIn.readLine() // let it run until user presses return
     bindingFuture

@@ -8,7 +8,7 @@ import org.mongodb.scala.bson.codecs.Macros._
 import org.mongodb.scala.{MongoClient, MongoDatabase}
 
 object DBManager {
-  private val mongoClient: MongoClient = MongoClient("mongodb://192.168.1.26")
+  private val mongoClient: MongoClient = MongoClient("mongodb://10.70.0.80")
 
   implicit val UserAuthDecoder: Decoder[UserAuth] = deriveDecoder[UserAuth]
   implicit val UserAuthEncoder: Encoder[UserAuth] = deriveEncoder[UserAuth]
@@ -23,6 +23,6 @@ object DBManager {
 
 
   def GetMongoConnection(): Option[MongoDatabase] = {
-    Option(mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry))
+    Option(mongoClient.getDatabase("eurasian").withCodecRegistry(codecRegistry))
   }
 }
