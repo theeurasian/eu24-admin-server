@@ -27,15 +27,15 @@ import scala.io.{Source, StdIn}
 
 object Main {
 
-  val ip = "10.70.0.100"
+  val ip = "0.0.0.0"
   val url = "http://188.242.27.197"
   val port = "5055"
   val restUrl: String = url + ":" + port
   //val cloudDirectory = "C:/files"
   val cloudDirectory = "/files"
   val botApi = "5912354671:AAG5R1ZuEijhqKLhP6X5QoYQAb_S4_BBmz0"
-  //val chatId = "-1001265788563" //EU24
-  val chatId = "-1001823572552" //TEST
+  val chatId = "-1001265788563" //EU24
+  //val chatId = "-1001823572552" //TEST
 
   val users: List[UserAuth] = List(
     UserAuth("editor", "TheEurasian124578editor", "create"),

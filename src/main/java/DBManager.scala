@@ -8,7 +8,7 @@ import org.mongodb.scala.bson.codecs.Macros._
 import org.mongodb.scala.{MongoClient, MongoDatabase}
 
 object DBManager {
-  private val mongoClient: MongoClient = MongoClient("mongodb://10.70.0.80")
+  private val mongoClient: MongoClient = MongoClient("mongodb://localhost")
 
   implicit val UserAuthDecoder: Decoder[UserAuth] = deriveDecoder[UserAuth]
   implicit val UserAuthEncoder: Encoder[UserAuth] = deriveEncoder[UserAuth]
