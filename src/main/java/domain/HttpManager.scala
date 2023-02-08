@@ -80,6 +80,10 @@ object HttpManager extends AppProps{
           NewsManager.publishPost(id)
           complete(HttpEntity("success"))
         },
+        (get & path("setPostStatus") & parameter("id", "status")) { (id, status) =>
+          NewsManager.setPostStatus(id, status)
+          complete(HttpEntity("success"))
+        },
       )
     }
 

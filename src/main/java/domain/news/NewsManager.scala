@@ -17,7 +17,7 @@ object NewsManager extends NewsHelper {
       message match {
         case PublishNews(period: String) =>
           if (period != "unknown"){
-            getPosts.filter(p => p.publishPeriod == period && new Date(p.publishDate).toInstant.atZone(ZoneId.systemDefault()) == LocalDate.now()).foreach(p => {
+            getPosts.filter(p => p.publishPeriod == period && new Date(p.publishDate).toInstant.atZone(ZoneId.systemDefault()).toLocalDate.toString == LocalDate.now().toString).foreach(p => {
               p.status match {
                 case "allow" =>
                   publishPost(p)

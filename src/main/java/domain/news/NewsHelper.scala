@@ -22,20 +22,20 @@ trait NewsHelper extends AppProps{
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         Await.result(mongo.getCollection("posts").find[Post].toFuture(), Duration(50, SECONDS)) match {
-          case files => files.toList
+          case posts => posts.toList
           case _ => List.empty[Post]
         }
       case _ => List.empty[Post]
     }
   }
-  def getPost(id: String): Option[Post] = {
+  def getPost(id: String): List[Post] = {
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         Await.result(mongo.getCollection("posts").find[Post](equal("id", id)).toFuture(), Duration(50, SECONDS)) match {
-          case post: Post => Option(post)
-          case _ => Option.empty[Post]
+          case posts: List[Post] => posts
+          case _ => List.empty[Post]
         }
-      case _ => Option.empty[Post]
+      case _ => List.empty[Post]
     }
   }
   def addPost(postValue: String): Unit = {
@@ -60,7 +60,7 @@ trait NewsHelper extends AppProps{
   }
   def publishPost(post: Post): Unit ={
     val client = SimpleHttpClient()
-    val postUrl = ""//s"<a href=\"${post.url}\">${post.url}</a>"
+    val postUrl = post.url //s"<a href=\"${post.url}\">${post.url}</a>"
     val text = post.header + " " + postUrl
     val filePath = post.imageUrl.replace(restUrl + "/files", cloudDirectory)
     val request: Request[String, Any] = basicRequest
@@ -71,9 +71,6 @@ trait NewsHelper extends AppProps{
     val res = response
   }
   def publishPost(id: String): Unit ={
-    getPost(id) match {
-      case Some(post) => publishPost(post)
-      case _ =>
-    }
+    getPost(id).take(1).foreach(p => publishPost(p))
   }
 }
