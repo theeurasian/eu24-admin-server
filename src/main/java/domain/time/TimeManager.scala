@@ -25,14 +25,14 @@ object TimeManager {
             else if (c.getTime.getHours == 15 && c.getTime.getMinutes == 0 && c.getTime.getSeconds == 0){
               "day"
             }
-            else if (c.getTime.getHours == 15 && c.getTime.getMinutes == 45 && c.getTime.getSeconds == 25){
+            else if (c.getTime.getHours == 21 && c.getTime.getMinutes == 0 && c.getTime.getSeconds == 0){
               "evening"
             }
             else{
               "unknown"
             }
           }
-          println(c.getTime.getSeconds)
+          //println(c.getTime.getSeconds)
           newsPublisher ! PublishNews(period)
           Behaviors.same
       })

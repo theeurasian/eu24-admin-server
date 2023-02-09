@@ -22,7 +22,7 @@ import org.mongodb.scala.model.Filters.{and, equal}
 import sttp.client3.{Request, SimpleHttpClient, UriContext, asStringAlways, basicRequest, multipartFile}
 
 import java.io.File
-import java.util.UUID
+import java.util.{Date, UUID}
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.io.StdIn
@@ -83,6 +83,9 @@ object HttpManager extends AppProps{
         (get & path("setPostStatus") & parameter("id", "status")) { (id, status) =>
           NewsManager.setPostStatus(id, status)
           complete(HttpEntity("success"))
+        },
+        (get & path("time")) {
+          complete(HttpEntity(new Date().getTime.toString.asJson.noSpaces))
         },
       )
     }
