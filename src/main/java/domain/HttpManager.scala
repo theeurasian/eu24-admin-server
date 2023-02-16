@@ -87,6 +87,9 @@ object HttpManager extends AppProps{
         (get & path("time")) {
           complete(HttpEntity(new Date().getTime.toString.asJson.noSpaces))
         },
+        (get & path("newsPack")) {
+          complete(HttpEntity(NewsManager.getVideoNewsPack.asJson.noSpaces))
+        },
       )
     }
 

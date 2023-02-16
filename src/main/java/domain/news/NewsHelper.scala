@@ -2,7 +2,7 @@ package domain.news
 
 import domain.AppProps
 import domain.database.DBManager
-import domain.news.NewsManager.Post
+import domain.news.NewsManager.{NewsPack, Post, VideoNews}
 import io.circe.jawn.decode
 import org.mongodb.scala.MongoCollection
 import io.circe.generic.auto._
@@ -26,6 +26,16 @@ trait NewsHelper extends AppProps{
           case _ => List.empty[Post]
         }
       case _ => List.empty[Post]
+    }
+  }
+  def getVideoNews: List[VideoNews] = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        Await.result(mongo.getCollection("video-news").find[VideoNews].toFuture(), Duration(50, SECONDS)) match {
+          case posts => posts.toList
+          case _ => List.empty[VideoNews]
+        }
+      case _ => List.empty[VideoNews]
     }
   }
   def getPost(id: String): List[Post] = {
@@ -58,6 +68,14 @@ trait NewsHelper extends AppProps{
       case _ =>
     }
   }
+  def setNewsStatus(id: String, status: String): Unit = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val posts: MongoCollection[Post] = mongo.getCollection("video-news")
+        Await.result(posts.updateOne(equal("id", id), set("status", status)).toFuture(), Duration(50, SECONDS))
+      case _ =>
+    }
+  }
   def publishPost(post: Post): Unit ={
     val client = SimpleHttpClient()
     val postUrl = post.url //s"<a href=\"${post.url}\">${post.url}</a>"
@@ -72,5 +90,19 @@ trait NewsHelper extends AppProps{
   }
   def publishPost(id: String): Unit ={
     getPost(id).take(1).foreach(p => publishPost(p))
+  }
+  def getVideoNewsPack: NewsPack = {
+    val videos = getVideoNews.filter(_.status == "published")
+    val inserts = videos.sortBy(_.date).reverse.map(_.url)
+    NewsPack(
+      videos.find(_.kind == "by").map(_.url).getOrElse(""),
+      videos.find(_.kind == "kz").map(_.url).getOrElse(""),
+      videos.find(_.kind == "cn").map(_.url).getOrElse(""),
+      videos.find(_.kind == "ru").map(_.url).getOrElse(""),
+      if (inserts.nonEmpty) inserts.head else "",
+      if (inserts.length > 1) inserts(1) else "",
+      if (inserts.length > 2) inserts(2) else "",
+      if (inserts.length > 3) inserts(3) else "",
+    )
   }
 }
