@@ -43,7 +43,7 @@ object HttpManager extends AppProps{
         (get & path("login") & parameter("login") & parameter("pass") & parameter("token")) { (login, pass, token) =>
           complete(HttpEntity(ContentTypes.`application/json`, checkAuth(login, pass, token).asJson.noSpaces))
         },
-        (post & path("file") & entity(as[Multipart.FormData]) ){ (formData) =>
+        (withoutSizeLimit & post & path("file") & entity(as[Multipart.FormData])){ (formData) =>
           var fileName = ""
           var fileUrl = ""
           val done: Future[Done] = formData.parts.mapAsync(1) {
@@ -73,8 +73,15 @@ object HttpManager extends AppProps{
           NewsManager.addPost(postValue)
           complete(HttpEntity("success"))
         },
+        (post & path("addVideoNews")  & entity(as[String])) { (postValue) =>
+          NewsManager.addVideoNews(postValue)
+          complete(HttpEntity("success"))
+        },
         (get & path("posts")) {
           complete(HttpEntity(NewsManager.getPosts.asJson.noSpaces))
+        },
+        (get & path("videoNews")) {
+          complete(HttpEntity(NewsManager.getVideoNews.asJson.noSpaces))
         },
         (get & path("publishPost") & parameter("id")) { (id) =>
           NewsManager.publishPost(id)
@@ -82,6 +89,10 @@ object HttpManager extends AppProps{
         },
         (get & path("setPostStatus") & parameter("id", "status")) { (id, status) =>
           NewsManager.setPostStatus(id, status)
+          complete(HttpEntity("success"))
+        },
+        (get & path("setVideoNewsStatus") & parameter("id", "status")) { (id, status) =>
+          NewsManager.setNewsStatus(id, status)
           complete(HttpEntity("success"))
         },
         (get & path("time")) {

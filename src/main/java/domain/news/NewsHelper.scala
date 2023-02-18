@@ -60,6 +60,18 @@ trait NewsHelper extends AppProps{
       case Left(value) =>
     }
   }
+  def addVideoNews(postValue: String): Unit = {
+    decode[VideoNews](postValue) match {
+      case Right(post) =>
+        DBManager.GetMongoConnection() match {
+          case Some(mongo) =>
+            val posts: MongoCollection[VideoNews] = mongo.getCollection("video-news")
+            Await.result(posts.insertOne(post.copy(id = UUID.randomUUID().toString)).toFuture(), Duration(50, SECONDS))
+          case _ =>
+        }
+      case Left(value) =>
+    }
+  }
   def setPostStatus(id: String, status: String): Unit = {
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
