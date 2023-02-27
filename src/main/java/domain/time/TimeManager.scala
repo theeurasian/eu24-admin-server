@@ -32,8 +32,10 @@ object TimeManager {
               "unknown"
             }
           }
+          if (period != "unknown"){
+            newsPublisher ! PublishNews(period)
+          }
           //println(c.getTime.getSeconds)
-          newsPublisher ! PublishNews(period)
           Behaviors.same
       })
     })

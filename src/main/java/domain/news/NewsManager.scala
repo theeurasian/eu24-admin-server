@@ -2,14 +2,12 @@ package domain.news
 
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
-
-import java.time.{LocalDate, ZoneId}
-import java.util.{Calendar, Date}
+import java.util.Calendar
 
 object NewsManager extends NewsHelper {
 
-  case class Post(id: String, date: Long, user: String, publishDate: Long, publishPeriod: String, header: String, url: String, imageUrl: String, status: String = "new")
-  case class VideoNews(id: String, date: Long, user: String, publishDate: Long, publishPeriod: String, kind: String, url: String, status: String = "new")
+  case class Post(id: String, date: Long, user: String, publishDay: Int, publishMonth: Int, publishYear: Int, publishPeriod: String, header: String, url: String, imageUrl: String, status: String = "new")
+  case class VideoNews(id: String, date: Long, user: String, publishDay: Int, publishMonth: Int, publishYear: Int, publishPeriod: String, kind: String, url: String, status: String = "new")
 
   case class PublishNews(period: String)
 
@@ -20,7 +18,7 @@ object NewsManager extends NewsHelper {
       message match {
         case PublishNews(period: String) =>
           if (period != "unknown"){
-            getPosts.filter(p => p.publishPeriod == period && new Date(p.publishDate).toInstant.atZone(ZoneId.systemDefault()).toLocalDate.toString == LocalDate.now().toString).foreach(p => {
+            getPosts.filter(p => p.publishPeriod == period && isToday(p.publishDay, p.publishMonth, p.publishYear)).foreach(p => {
               p.status match {
                 case "allow" =>
                   publishPost(p)
@@ -32,12 +30,14 @@ object NewsManager extends NewsHelper {
               }
             })
             val videoNews = getVideoNews
-            videoNews.filter(p => p.publishPeriod == period && new Date(p.publishDate).toInstant.atZone(ZoneId.systemDefault()).toLocalDate.toString == LocalDate.now().toString).foreach(p => {
+            videoNews.filter(p => p.publishPeriod == period && isToday(p.publishDay, p.publishMonth, p.publishYear)).foreach(p => {
               p.status match {
                 case "allow" =>
-                  videoNews.find(x => x.kind == p.kind && x.status == "published") match {
-                    case Some(publishNews) => setNewsStatus(publishNews.id, "archive-published")
-                    case _ => None
+                  if (p.kind != "ins"){
+                    videoNews.find(x => x.kind == p.kind && x.status == "published") match {
+                      case Some(publishNews) => setNewsStatus(publishNews.id, "archive-published")
+                      case _ => None
+                    }
                   }
                   setNewsStatus(p.id, "published")
                 case "deny" =>
@@ -49,5 +49,13 @@ object NewsManager extends NewsHelper {
           }
           Behaviors.same
       }
+  }
+
+  def isToday(pDay: Int, pMonth: Int, pYear: Int): Boolean = {
+    val c = Calendar.getInstance()
+    val day = c.get(Calendar.DATE)
+    val month = c.get(Calendar.MONTH)
+    val year = c.get(Calendar.YEAR)
+    day == pDay && month == pMonth && year == pYear
   }
 }

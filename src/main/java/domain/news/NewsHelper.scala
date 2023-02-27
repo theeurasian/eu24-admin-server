@@ -105,7 +105,7 @@ trait NewsHelper extends AppProps{
   }
   def getVideoNewsPack: NewsPack = {
     val videos = getVideoNews.filter(_.status == "published")
-    val inserts = videos.sortBy(_.date).reverse.map(_.url)
+    val inserts = videos.filter(_.kind == "ins").sortBy(_.date).reverse.map(_.url)
     NewsPack(
       videos.find(_.kind == "by").map(_.url).getOrElse(""),
       videos.find(_.kind == "kz").map(_.url).getOrElse(""),
