@@ -2,19 +2,22 @@ package domain.time
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
-import domain.news.NewsManager.PublishNews
+import domain.news.NewsManager.{CheckVideoSubs, PublishNews}
 import domain.news.NewsManager
 
 import java.util.{Calendar, Date}
-import scala.concurrent.duration.{Duration, SECONDS}
+import scala.concurrent.duration.{Duration, MINUTES, SECONDS}
 
 object TimeManager {
 
-  case class Tick()
+  trait TickMessage
+  case class Tick() extends TickMessage
+  case class TickSubsCheck() extends TickMessage
 
-  def apply(newsPublisher: ActorRef[NewsManager.PublishNews]): Behavior[Tick] = {
+  def apply(newsPublisher: ActorRef[NewsManager.NewsManagerMessages]): Behavior[TickMessage] = {
     Behaviors.withTimers(timers => {
       timers.startTimerWithFixedDelay(Tick(), Duration.Zero, Duration(1, SECONDS))
+      timers.startTimerWithFixedDelay(TickSubsCheck(), Duration.Zero, Duration(15, MINUTES))
       Behaviors.receiveMessage({
         case Tick() =>
           val c = Calendar.getInstance()
@@ -35,7 +38,9 @@ object TimeManager {
           if (period != "unknown"){
             newsPublisher ! PublishNews(period)
           }
-          //println(c.getTime.getSeconds)
+          Behaviors.same
+        case TickSubsCheck() =>
+          newsPublisher ! CheckVideoSubs()
           Behaviors.same
       })
     })

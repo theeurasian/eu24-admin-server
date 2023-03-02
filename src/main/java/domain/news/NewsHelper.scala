@@ -83,8 +83,16 @@ trait NewsHelper extends AppProps{
   def setNewsStatus(id: String, status: String): Unit = {
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
-        val posts: MongoCollection[Post] = mongo.getCollection("video-news")
+        val posts: MongoCollection[VideoNews] = mongo.getCollection("video-news")
         Await.result(posts.updateOne(equal("id", id), set("status", status)).toFuture(), Duration(50, SECONDS))
+      case _ =>
+    }
+  }
+  def setVideoNewsYouTubeUrl(id: String, youTubeUrl: String): Unit = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val posts: MongoCollection[VideoNews] = mongo.getCollection("video-news")
+        Await.result(posts.updateOne(equal("id", id), set("youTubeUrl", youTubeUrl)).toFuture(), Duration(50, SECONDS))
       case _ =>
     }
   }
@@ -106,6 +114,7 @@ trait NewsHelper extends AppProps{
   def getVideoNewsPack: NewsPack = {
     val videos = getVideoNews.filter(_.status == "published")
     val inserts = videos.filter(_.kind == "ins").sortBy(_.date).reverse.map(_.url)
+    val ads = videos.filter(_.kind.contains("ad")).sortBy(_.date).reverse.map(_.url)
     NewsPack(
       videos.find(_.kind == "by").map(_.url).getOrElse(""),
       videos.find(_.kind == "kz").map(_.url).getOrElse(""),
@@ -115,6 +124,10 @@ trait NewsHelper extends AppProps{
       if (inserts.length > 1) inserts(1) else "",
       if (inserts.length > 2) inserts(2) else "",
       if (inserts.length > 3) inserts(3) else "",
+      ads.filter(_.contains("by")),
+      ads.filter(_.contains("kz")),
+      ads.filter(_.contains("cn")),
+      ads.filter(_.contains("ru")),
     )
   }
 }
