@@ -42,47 +42,47 @@
         </dependency>
         <dependency>
             <groupId>ch.megard</groupId>
-            <artifactId>akka-http-cors_2.13</artifactId>
+            <artifactId>akka-http-cors_${scala.binary.version}</artifactId>
             <version>1.1.3</version>
         </dependency>
         <dependency>
             <groupId>org.mongodb.scala</groupId>
-            <artifactId>mongo-scala-bson_2.13</artifactId>
+            <artifactId>mongo-scala-bson_${scala.binary.version}</artifactId>
             <version>4.3.3</version>
         </dependency>
         <dependency>
             <groupId>org.mongodb.scala</groupId>
-            <artifactId>mongo-scala-driver_2.13</artifactId>
+            <artifactId>mongo-scala-driver_${scala.binary.version}</artifactId>
             <version>4.3.3</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-core_2.13</artifactId>
+            <artifactId>circe-core_${scala.binary.version}</artifactId>
             <version>0.14.1</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-generic_2.13</artifactId>
+            <artifactId>circe-generic_${scala.binary.version}</artifactId>
             <version>0.14.1</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-parser_2.13</artifactId>
+            <artifactId>circe-parser_${scala.binary.version}</artifactId>
             <version>0.14.1</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-generic-extras_2.13</artifactId>
+            <artifactId>circe-generic-extras_${scala.binary.version}</artifactId>
             <version>0.14.1</version>
         </dependency>
         <dependency>
             <groupId>com.softwaremill.sttp.client3</groupId>
-            <artifactId>core_2.13</artifactId>
+            <artifactId>core_${scala.binary.version}</artifactId>
             <version>3.8.8</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-slf4j_2.12</artifactId>
+            <artifactId>akka-slf4j_${scala.binary.version}</artifactId>
             <version>2.7.0</version>
         </dependency>
         <dependency>

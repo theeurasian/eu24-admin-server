@@ -4,30 +4,23 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.services.youtube.YouTube
-import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.client.auth.oauth2.Credential
-import com.google.api.client.auth.oauth2.StoredCredential
+import com.google.api.client.auth.oauth2.{Credential, StoredCredential}
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
 import com.google.api.client.util.store.DataStore
 import com.google.api.client.util.store.FileDataStoreFactory
-import jdk.xml.internal.SecuritySupport
-import com.google.api.client.googleapis.media.MediaHttpUploader
-import com.google.api.client.googleapis.media.MediaHttpUploaderProgressListener
 import com.google.api.client.http.InputStreamContent
-import com.google.api.services.youtube.YouTube
+import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.model.Video
 import com.google.api.services.youtube.model.VideoSnippet
 import com.google.api.services.youtube.model.VideoStatus
-
-import java.io.{File, FileInputStream, IOException, InputStreamReader}
+import java.io.{File, FileInputStream}
 import java.text.SimpleDateFormat
-import java.util
 import java.util.Calendar
 import scala.collection.JavaConverters._
-import java.util.Calendar
 import scala.io.Source
 
 object NewsManager extends NewsHelper {
@@ -44,8 +37,8 @@ object NewsManager extends NewsHelper {
   val langs = List("by", "kz", "cn", "ru")
   val CREDENTIALS_DIRECTORY = ".oauth-credentials"
   val HTTP_TRANSPORT = new NetHttpTransport()
-  val JSON_FACTORY = new JacksonFactory()
   val VIDEO_FILE_FORMAT = "video/*"
+  val JSON_FACTORY: JsonFactory = new JacksonFactory()
   val scopes: List[String] = List("https://www.googleapis.com/auth/youtube.upload")
 
   def apply(): Behavior[NewsManagerMessages] = Behaviors.receive {
@@ -92,7 +85,7 @@ object NewsManager extends NewsHelper {
             val findVtt = files.find(_.toString.contains(".vtt"))
             if (p.youTubeUrl == ""){
               val credential = authorize(scopes, "uploadvideo")
-              val youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), credential).setApplicationName("eurasian24").build()
+              val youtube = new YouTube.Builder(new NetHttpTransport(), JSON_FACTORY, credential).setApplicationName("eurasian24").build()
               val videoObjectDefiningMetadata = new Video()
               val status = new VideoStatus()
               status.setMadeForKids(false)
@@ -131,7 +124,7 @@ object NewsManager extends NewsHelper {
               setVideoNewsYouTubeUrl(p.id, "https://youtu.be/" + returnedVideo.getId)
             }
             else if (findVtt.isEmpty){
-
+              //todo yt-dlp --write-auto-sub --sub-lang en --skip-download https://youtu.be/lmyHuxAQwJA
             }
           })
           Behaviors.same

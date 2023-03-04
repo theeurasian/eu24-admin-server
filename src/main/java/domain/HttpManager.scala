@@ -10,21 +10,14 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{FileIO, Sink}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
-import com.mongodb.client.model.Updates.set
 import domain.auth.AuthManager.checkAuth
-import domain.database.DBManager
 import domain.news.NewsManager
-import domain.news.NewsManager.Post
 import domain.time.TimeManager
 import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
-import org.mongodb.scala.model.Filters.{and, equal}
-import sttp.client3.{Request, SimpleHttpClient, UriContext, asStringAlways, basicRequest, multipartFile}
-
 import java.io.File
 import java.util.{Date, UUID}
-import scala.concurrent.duration.{Duration, SECONDS}
-import scala.concurrent.{Await, ExecutionContextExecutor, Future}
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.io.StdIn
 
 object HttpManager extends AppProps{
