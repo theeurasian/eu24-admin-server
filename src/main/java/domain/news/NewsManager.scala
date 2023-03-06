@@ -17,7 +17,8 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.model.Video
 import com.google.api.services.youtube.model.VideoSnippet
 import com.google.api.services.youtube.model.VideoStatus
-import java.io.{File, FileInputStream}
+
+import java.io.{BufferedReader, File, FileInputStream, InputStreamReader}
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import scala.collection.JavaConverters._
@@ -32,9 +33,10 @@ object NewsManager extends NewsHelper {
   case class PublishNews(period: String) extends NewsManagerMessages
   case class CheckVideoSubs() extends NewsManagerMessages
 
-  case class NewsPack(by: String, kz: String, cn: String, ru: String, ins1: String, ins2: String, ins3: String, ins4: String, byAds: List[String], kzAds: List[String], cnAds: List[String], ruAds: List[String])
+  case class NewsPack(by: String, kz: String, cn: String, ru: String, byAds: List[String], kzAds: List[String], cnAds: List[String], ruAds: List[String], byCaptions: List[String], kzCaptions: List[String], cnCaptions: List[String], ruCaptions: List[String], ins: List[String])
 
-  val langs = List("by", "kz", "cn", "ru")
+  val langs: List[String] = List("by", "kz", "cn", "ru")
+  val subtitleLangs: List[String] = List("ja", "pt", "es", "ru", "fr", "en", "zh")
   val CREDENTIALS_DIRECTORY = ".oauth-credentials"
   val HTTP_TRANSPORT = new NetHttpTransport()
   val VIDEO_FILE_FORMAT = "video/*"
@@ -77,54 +79,64 @@ object NewsManager extends NewsHelper {
           }
           Behaviors.same
         case CheckVideoSubs() =>
-          val videoNews = getVideoNews.filter(p => langs.contains(p.kind)).filter(_.status == "published")
+          //val videoNews = getVideoNews.filter(p => langs.contains(p.kind)).filter(_.status == "published")
+          val videoNews = getVideoNews.filter(p => langs.contains(p.kind)).filter(_.status == "deny")
           videoNews.foreach(p => {
             val filePath = p.url.replace(restUrl + "/files", cloudDirectory)
-            val directory = new File(filePath).getParent
-            val files = new File(directory).listFiles().toList
-            val findVtt = files.find(_.toString.contains(".vtt"))
-            if (p.youTubeUrl == ""){
-              val credential = authorize(scopes, "uploadvideo")
-              val youtube = new YouTube.Builder(new NetHttpTransport(), JSON_FACTORY, credential).setApplicationName("eurasian24").build()
-              val videoObjectDefiningMetadata = new Video()
-              val status = new VideoStatus()
-              status.setMadeForKids(false)
-              status.setSelfDeclaredMadeForKids(false)
-              status.setPrivacyStatus("private")
-              videoObjectDefiningMetadata.setStatus(status)
-              val snippet = new VideoSnippet()
-              val c = Calendar.getInstance()
-              c.set(Calendar.YEAR, p.publishYear)
-              c.set(Calendar.MONTH, p.publishMonth)
-              c.set(Calendar.DATE, p.publishDay)
-              snippet.setTitle("Выпуск новостей от " + new SimpleDateFormat("dd.MM.yyyy").format(c.getTime) + ". " + (p.kind match {
-                case "by" => "Беларусь"
-                case "kz" => "Казахстан"
-                case "cn" => "Китай"
-                case "ru" => "Россия"
-              }) + ".")
-              snippet.setDefaultLanguage("ru")
-              snippet.setDefaultAudioLanguage("ru")
-              videoObjectDefiningMetadata.setSnippet(snippet)
+            if (new File(filePath).exists()){
+              val directory = new File(filePath).getParent + File.separator
+              val files = if (new File(directory).exists()) new File(directory).listFiles().toList else List.empty[File]
+              val findVtt = files.find(_.toString.contains(".vtt"))
+              if (p.youTubeUrl == ""){
+                try{
+                  val credential = authorize(scopes, "uploadvideo")
+                  val youtube = new YouTube.Builder(new NetHttpTransport(), JSON_FACTORY, credential).setApplicationName("eurasian24").build()
+                  val videoObjectDefiningMetadata = new Video()
+                  val status = new VideoStatus()
+                  status.setMadeForKids(false)
+                  status.setSelfDeclaredMadeForKids(false)
+                  status.setPrivacyStatus("private")
+                  videoObjectDefiningMetadata.setStatus(status)
+                  val snippet = new VideoSnippet()
+                  val c = Calendar.getInstance()
+                  c.set(Calendar.YEAR, p.publishYear)
+                  c.set(Calendar.MONTH, p.publishMonth)
+                  c.set(Calendar.DATE, p.publishDay)
+                  snippet.setTitle("Выпуск новостей от " + new SimpleDateFormat("dd.MM.yyyy").format(c.getTime) + ". " + (p.kind match {
+                    case "by" => "Беларусь"
+                    case "kz" => "Казахстан"
+                    case "cn" => "Китай"
+                    case "ru" => "Россия"
+                  }) + ".")
+                  snippet.setDefaultLanguage("ru")
+                  snippet.setDefaultAudioLanguage("ru")
+                  videoObjectDefiningMetadata.setSnippet(snippet)
 
-              val mediaContent = new InputStreamContent(VIDEO_FILE_FORMAT, new FileInputStream(filePath))
-              val videoInsert = youtube.videos.insert("snippet,statistics,status", videoObjectDefiningMetadata, mediaContent)
+                  val mediaContent = new InputStreamContent(VIDEO_FILE_FORMAT, new FileInputStream(filePath))
+                  val videoInsert = youtube.videos.insert("snippet,statistics,status", videoObjectDefiningMetadata, mediaContent)
 
-              val uploader = videoInsert.getMediaHttpUploader
-              uploader.setDirectUploadEnabled(false)
+                  val uploader = videoInsert.getMediaHttpUploader
+                  uploader.setDirectUploadEnabled(false)
 
-              val returnedVideo = videoInsert.execute
+                  val returnedVideo = videoInsert.execute
 
-              System.out.println("\n================== Returned Video ==================\n")
-              System.out.println("  - Id: " + returnedVideo.getId)
-              System.out.println("  - Title: " + returnedVideo.getSnippet.getTitle)
-              System.out.println("  - Tags: " + returnedVideo.getSnippet.getTags)
-              System.out.println("  - Privacy Status: " + returnedVideo.getStatus.getPrivacyStatus)
-              System.out.println("  - Video Count: " + returnedVideo.getStatistics.getViewCount)
-              setVideoNewsYouTubeUrl(p.id, "https://youtu.be/" + returnedVideo.getId)
-            }
-            else if (findVtt.isEmpty){
-              //todo yt-dlp --write-auto-sub --sub-lang en --skip-download https://youtu.be/lmyHuxAQwJA
+                  System.out.println("\n================== Returned Video ==================\n")
+                  System.out.println("  - Id: " + returnedVideo.getId)
+                  System.out.println("  - Title: " + returnedVideo.getSnippet.getTitle)
+                  System.out.println("  - Tags: " + returnedVideo.getSnippet.getTags)
+                  System.out.println("  - Privacy Status: " + returnedVideo.getStatus.getPrivacyStatus)
+                  System.out.println("  - Video Count: " + returnedVideo.getStatistics.getViewCount)
+                  setVideoNewsYouTubeUrl(p.id, "https://youtu.be/" + returnedVideo.getId)
+                }
+                catch {
+                  case e: Exception => println(e.toString)
+                }
+              }
+              else if (findVtt.isEmpty){
+                subtitleLangs.foreach(l => {
+                  Runtime.getRuntime.exec(s"yt-dlp --write-auto-sub --cookies $cookiesFile --sub-lang $l --skip-download ${p.youTubeUrl} -P $directory -o captions")
+                })
+              }
             }
           })
           Behaviors.same
@@ -146,7 +158,7 @@ object NewsManager extends NewsHelper {
     val clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, clientSecretReader)
     val fileDataStoreFactory = new FileDataStoreFactory(new File(System.getProperty("user.home") + "/" + CREDENTIALS_DIRECTORY))
     val datastore: DataStore[StoredCredential] = fileDataStoreFactory.getDataStore(credentialDatastore)
-    val flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, scopes.asJava).setCredentialDataStore(datastore).build
+    val flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, scopes.asJava).setCredentialDataStore(datastore).setAccessType("offline").build
     val localReceiver = new LocalServerReceiver.Builder().setPort(8080).build
     new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user")
   }

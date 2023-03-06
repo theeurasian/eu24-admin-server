@@ -2,7 +2,7 @@ package domain.news
 
 import domain.AppProps
 import domain.database.DBManager
-import domain.news.NewsManager.{NewsPack, Post, VideoNews}
+import domain.news.NewsManager.{NewsPack, Post, VideoNews, cloudDirectory, restUrl}
 import io.circe.jawn.decode
 import org.mongodb.scala.MongoCollection
 import io.circe.generic.auto._
@@ -114,20 +114,27 @@ trait NewsHelper extends AppProps{
   def getVideoNewsPack: NewsPack = {
     val videos = getVideoNews.filter(_.status == "published")
     val inserts = videos.filter(_.kind == "ins").sortBy(_.date).reverse.map(_.url)
-    val ads = videos.filter(_.kind.contains("ad")).sortBy(_.date).reverse.map(_.url)
+    val ads = videos.filter(_.kind.contains("ad")).sortBy(_.date)
     NewsPack(
       videos.find(_.kind == "by").map(_.url).getOrElse(""),
       videos.find(_.kind == "kz").map(_.url).getOrElse(""),
       videos.find(_.kind == "cn").map(_.url).getOrElse(""),
       videos.find(_.kind == "ru").map(_.url).getOrElse(""),
-      if (inserts.nonEmpty) inserts.head else "",
-      if (inserts.length > 1) inserts(1) else "",
-      if (inserts.length > 2) inserts(2) else "",
-      if (inserts.length > 3) inserts(3) else "",
-      ads.filter(_.contains("by")),
-      ads.filter(_.contains("kz")),
-      ads.filter(_.contains("cn")),
-      ads.filter(_.contains("ru")),
+      ads.filter(_.kind.contains("by")).map(_.url),
+      ads.filter(_.kind.contains("kz")).map(_.url),
+      ads.filter(_.kind.contains("cn")).map(_.url),
+      ads.filter(_.kind.contains("ru")).map(_.url),
+      getCaptions("by"),
+      getCaptions("kz"),
+      getCaptions("cn"),
+      getCaptions("ru"),
+      inserts
     )
+  }
+  def getCaptions(url: String): List[String] ={
+    val filePath = url.replace(restUrl + "/files", cloudDirectory)
+    val directory = if (new File(filePath).exists()) new File(filePath).getParent + File.separator else ""
+    val files = if (new File(directory).exists()) new File(directory).listFiles().toList else List.empty[File]
+    files.filter(_.getName.contains(".vtt")).map(x => directory.replace(cloudDirectory, restUrl + "/files") + x.getName)
   }
 }
