@@ -123,19 +123,23 @@ trait NewsHelper extends AppProps{
     val videos = getVideoNews.filter(_.status == "published")
     val inserts = videos.filter(_.kind == "ins").sortBy(_.date).reverse.map(_.url)
     val ads = videos.filter(_.kind.contains("ad")).sortBy(_.date)
+    val by = videos.find(_.kind == "by").map(_.url).getOrElse("")
+    val kz = videos.find(_.kind == "kz").map(_.url).getOrElse("")
+    val cn = videos.find(_.kind == "cn").map(_.url).getOrElse("")
+    val ru = videos.find(_.kind == "ru").map(_.url).getOrElse("")
     NewsPack(
-      videos.find(_.kind == "by").map(_.url).getOrElse(""),
-      videos.find(_.kind == "kz").map(_.url).getOrElse(""),
-      videos.find(_.kind == "cn").map(_.url).getOrElse(""),
-      videos.find(_.kind == "ru").map(_.url).getOrElse(""),
+      by,
+      kz,
+      cn,
+      ru,
       ads.filter(_.kind.contains("by")).map(_.url),
       ads.filter(_.kind.contains("kz")).map(_.url),
       ads.filter(_.kind.contains("cn")).map(_.url),
       ads.filter(_.kind.contains("ru")).map(_.url),
-      getCaptions("by"),
-      getCaptions("kz"),
-      getCaptions("cn"),
-      getCaptions("ru"),
+      getCaptions(by),
+      getCaptions(kz),
+      getCaptions(cn),
+      getCaptions(ru),
       inserts
     )
   }

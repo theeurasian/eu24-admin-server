@@ -49,7 +49,8 @@ object NewsManager extends NewsHelper {
       message match {
         case PublishNews(period: String) =>
           if (period != "unknown"){
-            getPosts.filter(p => p.publishPeriod == period && isToday(p.publishDay, p.publishMonth, p.publishYear)).foreach(p => {
+            val posts = getPosts
+            posts.filter(p => p.publishPeriod == period && isToday(p.publishDay, p.publishMonth, p.publishYear)).foreach(p => {
               p.status match {
                 case "allow" =>
                   publishPost(p)
@@ -87,7 +88,7 @@ object NewsManager extends NewsHelper {
           Behaviors.same
         case CheckVideoSubs() =>
           //val videoNews = getVideoNews.filter(p => langs.contains(p.kind)).filter(_.status == "published")
-          val videoNews = getVideoNews.filter(p => langs.contains(p.kind)).filter(_.status == "deny")
+          val videoNews = getVideoNews.filter(p => langs.contains(p.kind)).filter(_.status == "published")
           videoNews.foreach(p => {
             val filePath = p.url.replace(restUrl + "/files", cloudDirectory)
             if (new File(filePath).exists()){
