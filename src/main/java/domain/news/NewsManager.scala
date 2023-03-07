@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import scala.collection.JavaConverters._
 import scala.io.Source
+import scala.reflect.io.Directory
 
 object NewsManager extends NewsHelper {
 
@@ -36,7 +37,7 @@ object NewsManager extends NewsHelper {
   case class NewsPack(by: String, kz: String, cn: String, ru: String, byAds: List[String], kzAds: List[String], cnAds: List[String], ruAds: List[String], byCaptions: List[String], kzCaptions: List[String], cnCaptions: List[String], ruCaptions: List[String], ins: List[String])
 
   val langs: List[String] = List("by", "kz", "cn", "ru")
-  val subtitleLangs: List[String] = List("ja", "pt", "es", "ru", "fr", "en", "zh")
+  val subtitleLangs: List[String] = List("ja", "pt", "es", "ru", "fr", "en", "zh-Hans")
   val CREDENTIALS_DIRECTORY = ".oauth-credentials"
   val HTTP_TRANSPORT = new NetHttpTransport()
   val VIDEO_FILE_FORMAT = "video/*"
@@ -76,6 +77,12 @@ object NewsManager extends NewsHelper {
                   setNewsStatus(p.id, "archive-skipped")
               }
             })
+            videoNews.filter(p => p.status == "archive-published" || p.status == "archive-skipped").foreach(v => {
+              val filePath = v.url.replace(restUrl + "/files", cloudDirectory)
+              val directory = new File(filePath).getParent + File.separator
+              new Directory(new File(directory)).deleteRecursively()
+              println("Deleted directory: " + directory)
+            })
           }
           Behaviors.same
         case CheckVideoSubs() =>
@@ -86,7 +93,6 @@ object NewsManager extends NewsHelper {
             if (new File(filePath).exists()){
               val directory = new File(filePath).getParent + File.separator
               val files = if (new File(directory).exists()) new File(directory).listFiles().toList else List.empty[File]
-              val findVtt = files.find(_.toString.contains(".vtt"))
               if (p.youTubeUrl == ""){
                 try{
                   val credential = authorize(scopes, "uploadvideo")
@@ -132,9 +138,11 @@ object NewsManager extends NewsHelper {
                   case e: Exception => println(e.toString)
                 }
               }
-              else if (findVtt.isEmpty){
+              else {
                 subtitleLangs.foreach(l => {
-                  Runtime.getRuntime.exec(s"yt-dlp --write-auto-sub --cookies $cookiesFile --sub-lang $l --skip-download ${p.youTubeUrl} -P $directory -o captions")
+                  if (!files.exists(_.toString == l + ".captions.vtt")){
+                    Runtime.getRuntime.exec(s"yt-dlp --write-auto-sub --cookies $cookiesFile --sub-lang $l --skip-download ${p.youTubeUrl} -P $directory -o captions")
+                  }
                 })
               }
             }

@@ -72,6 +72,14 @@ trait NewsHelper extends AppProps{
       case Left(value) =>
     }
   }
+  def deleteVideoNews(id: String): Unit = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val posts: MongoCollection[VideoNews] = mongo.getCollection("video-news")
+        Await.result(posts.deleteOne(equal("id", id)).toFuture(), Duration(50, SECONDS))
+      case _ =>
+    }
+  }
   def setPostStatus(id: String, status: String): Unit = {
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
