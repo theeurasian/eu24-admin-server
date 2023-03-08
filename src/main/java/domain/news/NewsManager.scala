@@ -139,12 +139,14 @@ object NewsManager extends NewsHelper {
                   case e: Exception => println(e.toString)
                 }
               }
-              else {
-                subtitleLangs.foreach(l => {
-                  if (!files.exists(_.toString == l + ".captions.vtt")){
-                    Runtime.getRuntime.exec(s"yt-dlp --write-auto-sub --cookies $cookiesFile --sub-lang $l --skip-download ${p.youTubeUrl} -P $directory -o captions")
-                  }
-                })
+              else if(files.count(_.getName.contains(".vtt")) != subtitleLangs.length) {
+                try{
+                  val subLangs = subtitleLangs.mkString(",")
+                  Runtime.getRuntime.exec(s"yt-dlp --cookies /files/cookies.txt --write-auto-subs --sub-langs $subLangs --skip-download ${p.youTubeUrl} -P $directory -o captions --sleep-subtitles 60")
+                }
+                catch {
+                  case e: Exception => println(e.toString)
+                }
               }
             }
           })

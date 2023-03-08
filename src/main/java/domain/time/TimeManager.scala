@@ -17,7 +17,7 @@ object TimeManager {
   def apply(newsPublisher: ActorRef[NewsManager.NewsManagerMessages]): Behavior[TickMessage] = {
     Behaviors.withTimers(timers => {
       timers.startTimerWithFixedDelay(Tick(), Duration.Zero, Duration(1, SECONDS))
-      timers.startTimerWithFixedDelay(TickSubsCheck(), Duration.Zero, Duration(15, MINUTES))
+      timers.startTimerWithFixedDelay(TickSubsCheck(), Duration.Zero, Duration(35, MINUTES))
       Behaviors.receiveMessage({
         case Tick() =>
           val c = Calendar.getInstance()
