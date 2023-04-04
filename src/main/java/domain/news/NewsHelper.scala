@@ -127,6 +127,11 @@ trait NewsHelper extends AppProps{
     val kz = videos.find(_.kind == "kz").map(_.url).getOrElse("")
     val cn = videos.find(_.kind == "cn").map(_.url).getOrElse("")
     val ru = videos.find(_.kind == "ru").map(_.url).getOrElse("")
+    val byMobile = videos.find(_.kind == "by-mobile").map(_.url).getOrElse("")
+    val kzMobile = videos.find(_.kind == "kz-mobile").map(_.url).getOrElse("")
+    val cnMobile = videos.find(_.kind == "cn-mobile").map(_.url).getOrElse("")
+    val ruMobile = videos.find(_.kind == "ru-mobile").map(_.url).getOrElse("")
+    val mergeMobile = videos.find(_.kind == "merge-mobile").map(_.url).getOrElse("")
     NewsPack(
       by,
       kz,
@@ -140,7 +145,12 @@ trait NewsHelper extends AppProps{
       getCaptions(kz),
       getCaptions(cn),
       getCaptions(ru),
-      inserts
+      inserts,
+      byMobile,
+      kzMobile,
+      cnMobile,
+      ruMobile,
+      mergeMobile
     )
   }
   def getCaptions(url: String): List[String] ={

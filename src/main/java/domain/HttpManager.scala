@@ -15,6 +15,8 @@ import domain.news.NewsManager
 import domain.time.TimeManager
 import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
+import sttp.model.HeaderNames.ContentType
+
 import java.io.File
 import java.util.{Date, UUID}
 import scala.concurrent.{ExecutionContextExecutor, Future}
@@ -61,6 +63,9 @@ object HttpManager extends AppProps{
         },
         (get & path("files" / Segment / Segment)){ (path, name) =>
           getFromFile(cloudDirectory + "/" + path + "/" + name)
+        },
+        (get & path("files-download" / Segment / Segment)){ (path, name) =>
+          getFromFile(new File(cloudDirectory + "/" + path + "/" + name), ContentTypes.NoContentType)
         },
         (post & path("addPost")  & entity(as[String])) { (postValue) =>
           NewsManager.addPost(postValue)

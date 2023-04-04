@@ -11,9 +11,9 @@ trait AppProps {
   val chatId = "-1001265788563" //EU24
   val cookiesFile = "/files/cookies.txt"
 
-  //val cookiesFile = "D:\\projects\\theeurasian\\eu24-admin-server\\src\\main\\resources\\cookies.txt"
-  //val restUrl = "http://188.242.27.197:5055"
-  //val cloudDirectory = "C:/files"
-  //val chatId = "-1001823572552" //TEST
+//  val cookiesFile = "D:\\projects\\theeurasian\\eu24-admin-server\\src\\main\\resources\\cookies.txt"
+//  val restUrl = "http://188.242.27.197:5055"
+//  val cloudDirectory = "C:/files"
+//  val chatId = "-1001823572552" //TEST
 
 }
