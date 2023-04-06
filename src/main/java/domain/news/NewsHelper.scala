@@ -150,7 +150,8 @@ trait NewsHelper extends AppProps{
       kzMobile,
       cnMobile,
       ruMobile,
-      mergeMobile
+      mergeMobile,
+      getCaptions(mergeMobile)
     )
   }
   def getCaptions(url: String): List[String] ={

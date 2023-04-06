@@ -34,7 +34,7 @@ object NewsManager extends NewsHelper {
   case class PublishNews(period: String) extends NewsManagerMessages
   case class CheckVideoSubs() extends NewsManagerMessages
 
-  case class NewsPack(by: String, kz: String, cn: String, ru: String, byAds: List[String], kzAds: List[String], cnAds: List[String], ruAds: List[String], byCaptions: List[String], kzCaptions: List[String], cnCaptions: List[String], ruCaptions: List[String], ins: List[String], byMobile: String, kzMobile: String, cnMobile: String, ruMobile: String, mergeMobile: String)
+  case class NewsPack(by: String, kz: String, cn: String, ru: String, byAds: List[String], kzAds: List[String], cnAds: List[String], ruAds: List[String], byCaptions: List[String], kzCaptions: List[String], cnCaptions: List[String], ruCaptions: List[String], ins: List[String], byMobile: String, kzMobile: String, cnMobile: String, ruMobile: String, mergeMobile: String, mergeMobileCaptions: List[String])
 
   val langs: List[String] = List("by", "kz", "cn", "ru")
   val subtitleLangs: List[String] = List("ja", "pt", "es", "ru", "fr", "en", "zh-Hans")
@@ -88,7 +88,7 @@ object NewsManager extends NewsHelper {
           Behaviors.same
         case CheckVideoSubs() =>
           //val videoNews = getVideoNews.filter(p => langs.contains(p.kind)).filter(_.status == "published")
-          val videoNews = getVideoNews.filter(p => langs.contains(p.kind)).filter(_.status == "published")
+          val videoNews = getVideoNews.filter(p => langs.contains(p.kind) || p.kind == "merge-mobile").filter(_.status == "published")
           videoNews.foreach(p => {
             val filePath = p.url.replace(restUrl + "/files", cloudDirectory)
             if (new File(filePath).exists()){
@@ -114,6 +114,7 @@ object NewsManager extends NewsHelper {
                     case "kz" => "Казахстан"
                     case "cn" => "Китай"
                     case "ru" => "Россия"
+                    case "merge-mobile" => "Мобильная версия"
                   }) + ".")
                   snippet.setDefaultLanguage("ru")
                   snippet.setDefaultAudioLanguage("ru")
