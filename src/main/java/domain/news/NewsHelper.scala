@@ -11,7 +11,7 @@ import org.mongodb.scala.model.Updates._
 import sttp.client3.{Request, SimpleHttpClient, UriContext, asStringAlways, basicRequest, multipartFile}
 
 import java.io.File
-import java.util.UUID
+import java.util.{Date, UUID}
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 
@@ -54,7 +54,7 @@ trait NewsHelper extends AppProps{
         DBManager.GetMongoConnection() match {
           case Some(mongo) =>
             val posts: MongoCollection[Post] = mongo.getCollection("posts")
-            Await.result(posts.insertOne(post.copy(id = UUID.randomUUID().toString)).toFuture(), Duration(50, SECONDS))
+            Await.result(posts.insertOne(post.copy(id = UUID.randomUUID().toString, date = new Date().getTime)).toFuture(), Duration(50, SECONDS))
           case _ =>
         }
       case Left(value) =>
@@ -65,8 +65,8 @@ trait NewsHelper extends AppProps{
       case Right(post) =>
         DBManager.GetMongoConnection() match {
           case Some(mongo) =>
-            val posts: MongoCollection[VideoNews] = mongo.getCollection("video-news")
-            Await.result(posts.insertOne(post.copy(id = UUID.randomUUID().toString)).toFuture(), Duration(50, SECONDS))
+            val videos: MongoCollection[VideoNews] = mongo.getCollection("video-news")
+            Await.result(videos.insertOne(post.copy(id = UUID.randomUUID().toString, date = new Date().getTime)).toFuture(), Duration(50, SECONDS))
           case _ =>
         }
       case Left(value) =>
