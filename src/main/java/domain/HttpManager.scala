@@ -12,6 +12,7 @@ import akka.stream.scaladsl.{FileIO, Sink}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import domain.auth.AuthManager.checkAuth
 import domain.news.NewsManager
+import domain.news.NewsManager.publishVideoNews
 import domain.time.TimeManager
 import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
@@ -91,6 +92,7 @@ object HttpManager extends AppProps{
         },
         (get & path("setVideoNewsStatus") & parameter("id", "status")) { (id, status) =>
           NewsManager.setNewsStatus(id, status)
+          NewsManager.publishVideoNews(id, status)
           complete(HttpEntity("success"))
         },
         (get & path("time")) {
