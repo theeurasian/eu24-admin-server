@@ -128,11 +128,26 @@ trait NewsHelper extends AppProps{
     val response = client.send(request)
     val res = response
   }
+  def publishVideoNews(postValue: String): Unit ={
+    decode[VideoNews](postValue) match {
+      case Right(post) =>
+        if (post.status == "published"){
+          getVideoNews.find(_.id == post.id) match {
+            case Some(value) =>
+              if (value.kind == "merge-mobile"){
+                publishVideoNews(value)
+              }
+            case _ => None
+          }
+        }
+      case Left(value) =>
+    }
+  }
   def publishVideoNews(id: String, status: String): Unit ={
     if (status == "published"){
       getVideoNews.find(_.id == id) match {
         case Some(value) =>
-          if (value.kind.contains("merge")){
+          if (value.kind == "merge-mobile"){
             publishVideoNews(value)
           }
         case _ => None

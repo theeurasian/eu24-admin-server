@@ -74,6 +74,7 @@ object HttpManager extends AppProps{
         },
         (post & path("addVideoNews")  & entity(as[String])) { (postValue) =>
           NewsManager.addVideoNews(postValue)
+          NewsManager.publishVideoNews(postValue)
           complete(HttpEntity("success"))
         },
         (get & path("posts")) {
