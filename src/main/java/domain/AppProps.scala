@@ -9,6 +9,7 @@ trait AppProps {
   val restUrl = "https://eurasian24.online/rest"
   val cloudDirectory = "/files"
   val chatId = "-1001265788563" //EU24
+  val chatIdTEIU = "-1001888047138" //TEIU
   val cookiesFile = "/files/cookies.txt"
 
 //  val cookiesFile = "D:\\projects\\theeurasian\\eu24-admin-server\\src\\main\\resources\\cookies.txt"

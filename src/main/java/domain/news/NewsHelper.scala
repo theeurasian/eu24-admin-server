@@ -116,6 +116,18 @@ trait NewsHelper extends AppProps{
     val response = client.send(request)
     val res = response
   }
+  def publishVideoNews(video: VideoNews): Unit ={
+    val client = SimpleHttpClient()
+    val videoUrl = video.url.replace(restUrl + cloudDirectory + "/", "")
+    val text = "Выпуск новостей от " + video.publishDay + "." + video.publishMonth + "." + video.publishYear + videoUrl
+    val filePath = "/files/logo/logo24.jpg"
+    val request: Request[String, Any] = basicRequest
+      .response(asStringAlways)
+      .multipartBody(multipartFile("photo", new File(filePath)))
+      .post(uri"https://api.telegram.org/bot$botApi/sendPhoto?chat_id=$chatIdTEIU&parse_mode=HTML&caption=$text")
+    val response = client.send(request)
+    val res = response
+  }
   def publishPost(id: String): Unit ={
     getPost(id).take(1).foreach(p => publishPost(p))
   }

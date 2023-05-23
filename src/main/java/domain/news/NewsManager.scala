@@ -20,7 +20,7 @@ import com.google.api.services.youtube.model.VideoStatus
 
 import java.io.{BufferedReader, File, FileInputStream, InputStreamReader}
 import java.text.SimpleDateFormat
-import java.util.Calendar
+import java.util.{Calendar, Date}
 import scala.collection.JavaConverters._
 import scala.io.Source
 import scala.reflect.io.Directory
@@ -72,6 +72,9 @@ object NewsManager extends NewsHelper {
                     }
                   }
                   setNewsStatus(p.id, "published")
+                  if (p.kind.contains("merge")){
+                    publishVideoNews(p)
+                  }
                 case "deny" =>
                   setNewsStatus(p.id, "archive-denied")
                 case _ =>
@@ -79,15 +82,17 @@ object NewsManager extends NewsHelper {
               }
             })
             videoNews.filter(p => p.status == "archive-published" || p.status == "archive-skipped").foreach(v => {
-              val filePath = v.url.replace(restUrl + "/files", cloudDirectory)
-              val directory = new File(filePath).getParent + File.separator
-              new Directory(new File(directory)).deleteRecursively()
-              println("Deleted directory: " + directory)
+              val today = new Date().getTime
+              if (today - v.date > 1000 * 60 * 60 * 24 * 14){
+                val filePath = v.url.replace(restUrl + "/files", cloudDirectory)
+                val directory = new File(filePath).getParent + File.separator
+                new Directory(new File(directory)).deleteRecursively()
+                println("Deleted directory: " + directory)
+              }
             })
           }
           Behaviors.same
         case CheckVideoSubs() =>
-          //val videoNews = getVideoNews.filter(p => langs.contains(p.kind)).filter(_.status == "published")
           val videoNews = getVideoNews.filter(p => langs.contains(p.kind) || p.kind == "merge-mobile").filter(_.status == "published")
           videoNews.foreach(p => {
             val filePath = p.url.replace(restUrl + "/files", cloudDirectory)
