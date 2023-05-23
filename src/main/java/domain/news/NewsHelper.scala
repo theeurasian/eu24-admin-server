@@ -183,4 +183,10 @@ trait NewsHelper extends AppProps{
     val files = if (new File(directory).exists()) new File(directory).listFiles().toList else List.empty[File]
     files.filter(_.getName.contains(".vtt")).map(x => directory.replace(cloudDirectory, restUrl + "/files") + x.getName)
   }
+  def getCaptionsByFile(file: String): List[String] ={
+    val filePath = cloudDirectory + "/" + file
+    val directory = if (new File(filePath).exists()) new File(filePath).getParent + File.separator else ""
+    val files = if (new File(directory).exists()) new File(directory).listFiles().toList else List.empty[File]
+    files.filter(_.getName.contains(".vtt")).map(x => directory.replace(cloudDirectory, restUrl + "/files") + x.getName)
+  }
 }

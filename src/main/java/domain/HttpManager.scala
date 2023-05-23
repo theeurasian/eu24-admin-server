@@ -101,8 +101,8 @@ object HttpManager extends AppProps{
         (get & path("newsPack")) {
           complete(HttpEntity(NewsManager.getVideoNewsPack.asJson.noSpaces))
         },
-        (get & path("newsCaptions") & parameter("url")) { (url) =>
-          complete(HttpEntity(NewsManager.getCaptions(url).asJson.noSpaces))
+        (get & path("newsCaptions") & parameter("file")) { (file) =>
+          complete(HttpEntity(NewsManager.getCaptionsByFile(file).asJson.noSpaces))
         },
       )
     }
