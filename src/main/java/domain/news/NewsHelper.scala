@@ -118,8 +118,8 @@ trait NewsHelper extends AppProps{
   }
   def publishVideoNews(video: VideoNews): Unit ={
     val client = SimpleHttpClient()
-    val videoUrl = video.url.replace(restUrl + cloudDirectory + "/", "")
-    val text = "Выпуск новостей от " + video.publishDay + "." + video.publishMonth + "." + video.publishYear + videoUrl
+    val videoUrl = video.url.replace(restUrl + cloudDirectory + "/", "https://eurasian24.ru/watch?url=")
+    val text = "Выпуск новостей от " + video.publishDay + "." + video.publishMonth + "." + video.publishYear + " " + videoUrl
     val filePath = "/files/logo/logo24.jpg"
     val request: Request[String, Any] = basicRequest
       .response(asStringAlways)
