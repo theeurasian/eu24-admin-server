@@ -119,7 +119,8 @@ trait NewsHelper extends AppProps{
   def publishVideoNews(video: VideoNews): Unit ={
     val client = SimpleHttpClient()
     val videoUrl = video.url.replace(restUrl + cloudDirectory + "/", "https://eurasian24.ru/watch?url=")
-    val text = "Выпуск новостей от " + video.publishDay + "." + video.publishMonth + "." + video.publishYear + " " + videoUrl
+    //val text = "Eurasian24 " + video.publishDay + "." + video.publishMonth + "." + video.publishYear + " " + videoUrl
+    val text = "Eurasian24 " + videoUrl
     val filePath = "/files/logo/logo24.jpg"
     val request: Request[String, Any] = basicRequest
       .response(asStringAlways)
@@ -147,7 +148,7 @@ trait NewsHelper extends AppProps{
     if (status == "published"){
       getVideoNews.find(_.id == id) match {
         case Some(value) =>
-          if (value.kind == "merge-mobile"){
+          if (value.kind.contains("merge")){
             publishVideoNews(value)
           }
         case _ => None
