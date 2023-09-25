@@ -83,7 +83,7 @@ object NewsManager extends NewsHelper {
             })
             videoNews.filter(p => p.status == "archive-published" || p.status == "archive-skipped").foreach(v => {
               val today = new Date().getTime
-              if (today - v.date > 1000 * 60 * 60 * 24 * 14){
+              if (today - v.date > 1000 * 60 * 60 * 24 * 7 && !v.kind.contains("merge")){
                 val filePath = v.url.replace(restUrl + "/files", cloudDirectory)
                 val directory = new File(filePath).getParent + File.separator
                 new Directory(new File(directory)).deleteRecursively()
