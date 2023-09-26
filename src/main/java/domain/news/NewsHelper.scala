@@ -65,8 +65,15 @@ trait NewsHelper extends AppProps{
       case Right(post) =>
         DBManager.GetMongoConnection() match {
           case Some(mongo) =>
+            val id = UUID.randomUUID().toString
             val videos: MongoCollection[VideoNews] = mongo.getCollection("video-news")
-            Await.result(videos.insertOne(post.copy(id = UUID.randomUUID().toString, date = new Date().getTime)).toFuture(), Duration(50, SECONDS))
+            Await.result(videos.insertOne(post.copy(id = id, date = new Date().getTime)).toFuture(), Duration(50, SECONDS))
+            if (post.status == "published" && post.kind == "merge-mobile"){
+              getVideoNews.find(_.id == id) match {
+                case Some(videoNews) => publishVideoNews(videoNews)
+                case _ => None
+              }
+            }
           case _ =>
         }
       case Left(value) =>

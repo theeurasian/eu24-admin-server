@@ -72,9 +72,9 @@ object HttpManager extends AppProps{
           NewsManager.addPost(postValue)
           complete(HttpEntity("success"))
         },
-        (post & path("addVideoNews")  & entity(as[String])) { (postValue) =>
+        (post & path("addVideoNews") & entity(as[String])) { (postValue) =>
           NewsManager.addVideoNews(postValue)
-          NewsManager.publishVideoNews(postValue)
+          //NewsManager.publishVideoNews(postValue)
           complete(HttpEntity("success"))
         },
         (get & path("posts")) {
@@ -93,7 +93,7 @@ object HttpManager extends AppProps{
         },
         (get & path("setVideoNewsStatus") & parameter("id", "status")) { (id, status) =>
           NewsManager.setNewsStatus(id, status)
-          NewsManager.publishVideoNews(id, status)
+          //NewsManager.publishVideoNews(id, status)
           complete(HttpEntity("success"))
         },
         (get & path("time")) {
