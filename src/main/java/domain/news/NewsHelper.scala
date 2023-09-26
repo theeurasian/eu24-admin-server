@@ -112,22 +112,28 @@ trait NewsHelper extends AppProps{
     val request: Request[String, Any] = basicRequest
       .response(asStringAlways)
       .multipartBody(multipartFile("photo", new File(filePath)))
-      .post(uri"https://api.telegram.org/bot$botApi/sendPhoto?chat_id=$chatId&parse_mode=HTML&caption=$text")
+      .post(uri"https://api.telegram.org/bot$botApi/sendPhoto?chat_id=$chatIdEU24&parse_mode=HTML&caption=$text")
     val response = client.send(request)
     val res = response
   }
   def publishVideoNews(video: VideoNews): Unit ={
     val client = SimpleHttpClient()
     val videoUrl = video.url.replace(restUrl + cloudDirectory + "/", "https://eurasian24.ru/watch?url=")
-    //val text = "Eurasian24 " + video.publishDay + "." + video.publishMonth + "." + video.publishYear + " " + videoUrl
-    val text = "Eurasian24 " + videoUrl
+    val text = "Выпуск новостей от " + addLeftZeroes(video.publishDay) + "." + addLeftZeroes(video.publishMonth) + "." + addLeftZeroes(video.publishYear) + " " + videoUrl
     val filePath = "/files/logo/logo24.jpg"
     val request: Request[String, Any] = basicRequest
       .response(asStringAlways)
       .multipartBody(multipartFile("photo", new File(filePath)))
-      .post(uri"https://api.telegram.org/bot$botApi/sendPhoto?chat_id=$chatIdTEIU&parse_mode=HTML&caption=$text")
+      .post(uri"https://api.telegram.org/bot$botApi/sendPhoto?chat_id=$chatIdEU24TV&parse_mode=HTML&caption=$text")
     val response = client.send(request)
     val res = response
+  }
+  def addLeftZeroes(in: Int, length: Int = 2): String ={
+    var res = in.toString
+    while (res.length < length){
+      res = "0" + res
+    }
+    res
   }
   def publishVideoNews(postValue: String): Unit ={
     decode[VideoNews](postValue) match {

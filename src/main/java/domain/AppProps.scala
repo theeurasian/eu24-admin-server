@@ -8,7 +8,8 @@ trait AppProps {
 
   val restUrl = "https://eurasian24.online/rest"
   val cloudDirectory = "/files"
-  val chatId = "-1001265788563" //EU24
+  val chatIdEU24 = "-1001265788563" //EU24
+  val chatIdEU24TV = "-1001849993353" //EU24TV
   val chatIdTEIU = "-1001888047138" //TEIU
   val cookiesFile = "/files/cookies.txt"
 
