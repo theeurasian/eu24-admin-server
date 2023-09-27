@@ -66,13 +66,11 @@ trait NewsHelper extends AppProps{
         DBManager.GetMongoConnection() match {
           case Some(mongo) =>
             val id = UUID.randomUUID().toString
+            val newPost = post.copy(id = id, date = new Date().getTime)
             val videos: MongoCollection[VideoNews] = mongo.getCollection("video-news")
-            Await.result(videos.insertOne(post.copy(id = id, date = new Date().getTime)).toFuture(), Duration(50, SECONDS))
-            if (post.status == "published" && post.kind == "merge-mobile"){
-              getVideoNews.find(_.id == id) match {
-                case Some(videoNews) => publishVideoNews(videoNews)
-                case _ => None
-              }
+            Await.result(videos.insertOne(newPost).toFuture(), Duration(50, SECONDS))
+            if (post.status == "published" && post.kind.contains("merge")){
+              publishVideoNews(newPost)
             }
           case _ =>
         }
@@ -126,7 +124,7 @@ trait NewsHelper extends AppProps{
   def publishVideoNews(video: VideoNews): Unit ={
     val client = SimpleHttpClient()
     val videoUrl = video.url.replace(restUrl + cloudDirectory + "/", "https://eurasian24.ru/watch?url=")
-    val text = "Выпуск новостей от " + addLeftZeroes(video.publishDay) + "." + addLeftZeroes(video.publishMonth) + "." + addLeftZeroes(video.publishYear) + " " + videoUrl
+    val text = "Выпуск новостей от " + addLeftZeroes(video.publishDay) + "." + addLeftZeroes(video.publishMonth + 1) + "." + addLeftZeroes(video.publishYear) + " " + videoUrl
     val filePath = "/files/logo/logo24.jpg"
     val request: Request[String, Any] = basicRequest
       .response(asStringAlways)
