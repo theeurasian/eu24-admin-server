@@ -142,7 +142,7 @@ trait NewsHelper extends AppProps{
   }
   def publishVideoNewsInTelegram(): Unit ={
     getVideoNews.find(x => x.status == "published" && x.kind.contains("merge")) match {
-      case Some (value) => publishVideoNews (value)
+      case Some(value) => publishVideoNews(value)
       case _ => None
     }
   }
