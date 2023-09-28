@@ -125,7 +125,7 @@ trait NewsHelper extends AppProps{
     val client = SimpleHttpClient()
     val videoUrl = video.url.replace(restUrl + cloudDirectory + "/", "https://eurasian24.ru/watch?url=")
     val text = "Выпуск новостей от " + addLeftZeroes(video.publishDay) + "." + addLeftZeroes(video.publishMonth + 1) + "." + addLeftZeroes(video.publishYear) + " " + videoUrl
-    val filePath = "/files/logo/logo24.jpg"
+    val filePath = "/files/logo24.jpg"
     val request: Request[String, Any] = basicRequest
       .response(asStringAlways)
       .multipartBody(multipartFile("photo", new File(filePath)))
