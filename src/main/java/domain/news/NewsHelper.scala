@@ -2,7 +2,7 @@ package domain.news
 
 import domain.AppProps
 import domain.database.DBManager
-import domain.news.NewsManager.{NewsPack, Post, VideoNews, cloudDirectory, restUrl}
+import domain.news.NewsManager.{NewsPack, Post, VideoNews, cloudDirectory, getVideoNews, publishVideoNews, restUrl}
 import io.circe.jawn.decode
 import org.mongodb.scala.MongoCollection
 import io.circe.generic.auto._
@@ -140,19 +140,10 @@ trait NewsHelper extends AppProps{
     }
     res
   }
-  def publishVideoNews(postValue: String): Unit ={
-    decode[VideoNews](postValue) match {
-      case Right(post) =>
-        if (post.status == "published"){
-          getVideoNews.find(_.id == post.id) match {
-            case Some(value) =>
-              if (value.kind == "merge-mobile"){
-                publishVideoNews(value)
-              }
-            case _ => None
-          }
-        }
-      case Left(value) =>
+  def publishVideoNewsInTelegram(): Unit ={
+    getVideoNews.find (x => x.status == "published" && x.kind.contains ("merge")) match {
+      case Some (value) => publishVideoNews (value)
+      case _ => None
     }
   }
   def publishVideoNews(id: String, status: String): Unit ={
