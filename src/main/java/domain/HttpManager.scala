@@ -67,6 +67,9 @@ object HttpManager extends AppProps{
         (get & path("files-download" / Segment / Segment)){ (path, name) =>
           getFromFile(new File(cloudDirectory + "/" + path + "/" + name), ContentTypes.NoContentType)
         },
+        (get & path("files-download" / Segment / Segment) & parameter("fileName")){ (path, name, fileName) =>
+          getFromFile(new File(cloudDirectory + "/" + path + "/" + fileName), ContentTypes.NoContentType)
+        },
         (post & path("addPost")  & entity(as[String])) { (postValue) =>
           NewsManager.addPost(postValue)
           complete(HttpEntity("success"))

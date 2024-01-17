@@ -37,7 +37,7 @@ object NewsManager extends NewsHelper {
   case class NewsPack(by: String, kz: String, cn: String, ru: String, byAds: List[String], kzAds: List[String], cnAds: List[String], ruAds: List[String], byCaptions: List[String], kzCaptions: List[String], cnCaptions: List[String], ruCaptions: List[String], ins: List[String], byMobile: String, kzMobile: String, cnMobile: String, ruMobile: String, mergeMobile: String, mergeMobileCaptions: List[String])
 
   val langs: List[String] = List("by", "kz", "cn", "ru")
-  val subtitleLangs: List[String] = List("ja", "pt", "es", "ru", "fr", "en", "zh-Hans")
+  val subtitleLangs: List[String] = List("ja", "pt", "es", "ru", "fr", "en", "zh-Hans", "ar", "hi")
   val CREDENTIALS_DIRECTORY = ".oauth-credentials"
   val HTTP_TRANSPORT = new NetHttpTransport()
   val VIDEO_FILE_FORMAT = "video/*"
@@ -148,7 +148,7 @@ object NewsManager extends NewsHelper {
               else if(files.count(_.getName.contains(".vtt")) != subtitleLangs.length) {
                 try{
                   val subLangs = subtitleLangs.mkString(",")
-                  Runtime.getRuntime.exec(s"yt-dlp --cookies /files/cookies.txt --write-auto-subs --sub-langs $subLangs --skip-download ${p.youTubeUrl} -P $directory -o captions --sleep-subtitles 60")
+                  Runtime.getRuntime.exec(s"yt-dlp --cookies /files/cookies.txt --write-auto-subs --sub-langs $subLangs --skip-download ${p.youTubeUrl} -P $directory -o captions --sleep-subtitles 60 --no-overwrite")
                 }
                 catch {
                   case e: Exception => println(e.toString)
