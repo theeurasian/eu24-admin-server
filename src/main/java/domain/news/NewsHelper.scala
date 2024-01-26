@@ -2,7 +2,7 @@ package domain.news
 
 import domain.AppProps
 import domain.database.DBManager
-import domain.news.NewsManager.{NewsPack, Post, VideoNews, cloudDirectory, getVideoNews, publishVideoNews, restUrl}
+import domain.news.NewsManager.{ClientStatus, NewsPack, Post, VideoNews, cloudDirectory, getVideoNews, publishVideoNews, restUrl}
 import io.circe.jawn.decode
 import org.mongodb.scala.MongoCollection
 import io.circe.generic.auto._
@@ -206,5 +206,24 @@ trait NewsHelper extends AppProps{
     val directory = if (new File(filePath).exists()) new File(filePath).getParent + File.separator else ""
     val files = if (new File(directory).exists()) new File(directory).listFiles().toList else List.empty[File]
     files.filter(_.getName.contains(".vtt")).map(x => directory.replace(cloudDirectory, restUrl + "/files") + x.getName)
+  }
+  def updateClientStatus(client: String, status: String): String ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val clientStatus: MongoCollection[ClientStatus] = mongo.getCollection("client-status")
+        Await.result(clientStatus.insertOne(ClientStatus(client, status, new Date().getTime)).toFuture(), Duration(50, SECONDS))
+      case _ =>
+    }
+    "success"
+  }
+  def getClientLog(client: String): List[ClientStatus] ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        Await.result(mongo.getCollection("client-status").find[ClientStatus](equal("client", client)).toFuture(), Duration(50, SECONDS)) match {
+          case posts => posts.toList.sortBy(_.date).reverse
+          case _ => List.empty[ClientStatus]
+        }
+      case _ => List.empty[ClientStatus]
+    }
   }
 }

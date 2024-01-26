@@ -33,6 +33,8 @@ object NewsManager extends NewsHelper {
   trait NewsManagerMessages
   case class PublishNews(period: String) extends NewsManagerMessages
   case class CheckVideoSubs() extends NewsManagerMessages
+  case class UpdateClientStatus(client: String, status: String)
+  case class ClientStatus(client: String, status: String, date: Long)
 
   case class NewsPack(by: String, kz: String, cn: String, ru: String, byAds: List[String], kzAds: List[String], cnAds: List[String], ruAds: List[String], byCaptions: List[String], kzCaptions: List[String], cnCaptions: List[String], ruCaptions: List[String], ins: List[String], byMobile: String, kzMobile: String, cnMobile: String, ruMobile: String, mergeMobile: String, mergeMobileCaptions: List[String])
 

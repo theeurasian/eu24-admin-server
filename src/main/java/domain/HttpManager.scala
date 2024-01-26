@@ -111,6 +111,12 @@ object HttpManager extends AppProps{
         (get & path("newsCaptions") & parameter("file")) { (file) =>
           complete(HttpEntity(NewsManager.getCaptionsByFile(file).asJson.noSpaces))
         },
+        (get & path("updateClientStatus") & parameter("client", "status")) { (client, status) =>
+          complete(HttpEntity(NewsManager.updateClientStatus(client, status).asJson.noSpaces))
+        },
+        (get & path("clientLog") & parameter("client")) { (client) =>
+          complete(HttpEntity(NewsManager.getClientLog(client).asJson.noSpaces))
+        },
       )
     }
 
