@@ -2,7 +2,7 @@ package domain.news
 
 import domain.AppProps
 import domain.database.DBManager
-import domain.news.NewsManager.{ClientStatus, NewsPack, Post, VideoNews, cloudDirectory, getVideoNews, publishVideoNews, restUrl}
+import domain.news.NewsManager.{CGTNUrl, ClientStatus, NewsPack, Post, VideoNews, cloudDirectory, getVideoNews, publishVideoNews, restUrl}
 import io.circe.jawn.decode
 import org.mongodb.scala.MongoCollection
 import io.circe.generic.auto._
@@ -221,11 +221,38 @@ trait NewsHelper extends AppProps{
   def getClientLog(client: String): List[ClientStatus] ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
-        Await.result(mongo.getCollection("client-status").find[ClientStatus](equal("client", client)).toFuture(), Duration(50, SECONDS)) match {
-          case posts => posts.toList.sortBy(_.date).reverse
-          case _ => List.empty[ClientStatus]
+        if (client == "all"){
+          Await.result(mongo.getCollection("client-status").find[ClientStatus]().toFuture(), Duration(50, SECONDS)) match {
+            case posts => posts.toList.sortBy(_.date).reverse
+            case _ => List.empty[ClientStatus]
+          }
+        }
+        else{
+          Await.result(mongo.getCollection("client-status").find[ClientStatus](equal("client", client)).toFuture(), Duration(50, SECONDS)) match {
+            case posts => posts.toList.sortBy(_.date).reverse
+            case _ => List.empty[ClientStatus]
+          }
         }
       case _ => List.empty[ClientStatus]
+    }
+  }
+  def addCGTNUrls(urls: String): String ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val clientStatus: MongoCollection[CGTNUrl] = mongo.getCollection("cgtn-urls")
+        Await.result(clientStatus.insertOne(CGTNUrl(urls, new Date().getTime)).toFuture(), Duration(50, SECONDS))
+      case _ =>
+    }
+    "success"
+  }
+  def getCGTNUrls: List[CGTNUrl] ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        Await.result(mongo.getCollection("cgtn-urls").find[CGTNUrl]().toFuture(), Duration(50, SECONDS)) match {
+          case urls => urls.toList.sortBy(_.date).reverse
+          case _ => List.empty[CGTNUrl]
+        }
+      case _ => List.empty[CGTNUrl]
     }
   }
 }

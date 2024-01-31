@@ -117,6 +117,12 @@ object HttpManager extends AppProps{
         (get & path("clientLog") & parameter("client")) { (client) =>
           complete(HttpEntity(NewsManager.getClientLog(client).asJson.noSpaces))
         },
+        (get & path("updateCGTNUrls") & parameter("urls")) { (urls) =>
+          complete(HttpEntity(NewsManager.addCGTNUrls(urls).asJson.noSpaces))
+        },
+        (get & path("CGTNUrls")) {
+          complete(HttpEntity(NewsManager.getCGTNUrls.asJson.noSpaces))
+        },
       )
     }
 
