@@ -9,8 +9,10 @@ import io.circe.generic.auto._
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Updates._
 import sttp.client3.{Request, SimpleHttpClient, UriContext, asStringAlways, basicRequest, multipartFile}
+import sttp.model.Uri
 
 import java.io.File
+import java.net.{URI, URLEncoder}
 import java.util.{Date, UUID}
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
