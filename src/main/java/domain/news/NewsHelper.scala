@@ -177,7 +177,7 @@ trait NewsHelper extends AppProps{
   def sendGreetingToSubscribeer(name: String, email: String): Unit ={
     try{
       try{
-        val text = "Благодарим Вас за оформление подписки на новостную рассылку Eurasian 24. Раз в день вам будет приходить письмо с видеовыпуском актуальных новостей"
+        val text = "Благодарим Вас за оформление подписки на новостную рассылку Eurasian 24. Раз в день Вам будет приходить письмо с видеовыпуском актуальных новостей."
         val html = Source.fromResource("greetings.html")(Codec.UTF8).mkString.replace("&text", text)
         val mailer = MailerBuilder
           .withSMTPServer("smtp.mail.ru", 465, mailRuLogin, mailRuPass)
