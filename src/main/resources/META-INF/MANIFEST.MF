@@ -1,33 +1,37 @@
 Manifest-Version: 1.0
 Main-Class: Main
-Class-Path: akka-http-cors_2.13-1.1.3.jar httpclient-4.5.13.jar config-1
- .4.2.jar auto-value-annotations-1.10.1.jar google-http-client-apache-v2
- -1.42.0.jar mongo-scala-driver_2.13-4.3.3.jar circe-generic-extras_2.13
- -0.14.1.jar listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.
- jar akka-actor_2.13-2.7.0.jar mongodb-driver-core-4.3.3.jar reactor-cor
- e-3.2.22.RELEASE.jar circe-parser_2.13-0.14.1.jar akka-stream_2.13-2.7.
- 0.jar circe-core_2.13-0.14.1.jar guava-31.1-jre.jar google-http-client-
- gson-1.42.0.jar cats-core_2.13-2.6.1.jar circe-numbers_2.13-0.14.1.jar 
- reactive-streams-1.0.4.jar akka-parsing_2.13-10.4.0.jar akka-protobuf-v
- 3_2.13-2.7.0.jar akka-http_2.13-10.4.0.jar google-auth-library-oauth2-h
- ttp-1.16.0.jar slf4j-api-1.7.36.jar akka-http-core_2.13-10.4.0.jar goog
- le-http-client-jackson2-1.20.0.jar google-http-client-1.42.0.jar google
- -api-services-youtube-v3-rev222-1.25.0.jar google-oauth-client-java6-1.
- 34.1.jar jsr305-3.0.2.jar google-api-client-jackson2-1.20.0.jar mongodb
- -driver-reactivestreams-4.3.3.jar google-api-client-1.35.2.jar commons-
- codec-1.11.jar scala-library-2.13.10.jar scala-reflect-2.13.10.jar bson
- -4.3.3.jar google-auth-library-credentials-1.16.0.jar scala-parser-comb
- inators_2.13-1.1.2.jar logback-core-1.2.11.jar google-oauth-client-jett
- y-1.34.1.jar mongo-scala-bson_2.13-4.3.3.jar ws_2.13-1.3.12.jar httpcor
- e-4.4.15.jar jackson-core-2.1.3.jar core_2.13-1.5.4.jar scala-java8-com
- pat_2.13-1.0.0.jar failureaccess-1.0.1.jar checker-qual-3.12.0.jar simu
- lacrum-scalafix-annotations_2.13-0.5.4.jar shapeless_2.13-2.3.7.jar cor
- e_2.13-3.8.8.jar ssl-config-core_2.13-0.4.3.jar akka-actor-typed_2.13-2
- .7.0.jar circe-jawn_2.13-0.14.1.jar logback-classic-1.2.11.jar google-o
- auth-client-1.34.1.jar cats-kernel_2.13-2.6.1.jar commons-logging-1.2.j
- ar opencensus-contrib-http-util-0.31.1.jar jawn-parser_2.13-1.1.2.jar s
- cala-library-2.13.10.jar core_2.13-1.3.12.jar error_prone_annotations-2
- .11.0.jar j2objc-annotations-1.3.jar opencensus-api-0.31.1.jar scala-re
- flect-2.13.4.jar circe-generic_2.13-0.14.1.jar grpc-context-1.27.2.jar 
- akka-slf4j_2.13-2.7.0.jar gson-2.9.0.jar
+Class-Path: mongodb-driver-core-4.3.3.jar ssl-config-core_2.13-0.4.3.jar
+  shapeless_2.13-2.3.7.jar simple-java-mail-6.6.1.jar grpc-context-1.27.
+ 2.jar google-http-client-1.42.0.jar reactive-streams-1.0.4.jar google-a
+ pi-client-jackson2-1.20.0.jar jakarta.activation-api-1.2.1.jar akka-htt
+ p_2.13-10.4.0.jar google-http-client-apache-v2-1.42.0.jar akka-parsing_
+ 2.13-10.4.0.jar circe-generic_2.13-0.14.1.jar core_2.13-1.5.4.jar googl
+ e-auth-library-credentials-1.16.0.jar google-oauth-client-1.34.1.jar gu
+ ava-31.1-jre.jar jsr305-3.0.2.jar scala-java8-compat_2.13-1.0.0.jar goo
+ gle-http-client-gson-1.42.0.jar akka-http-cors_2.13-1.1.3.jar jackson-c
+ ore-2.1.3.jar google-oauth-client-jetty-1.34.1.jar failureaccess-1.0.1.
+ jar jawn-parser_2.13-1.1.2.jar jakarta.annotation-api-1.3.5.jar akka-ht
+ tp-core_2.13-10.4.0.jar commons-logging-1.2.jar config-1.4.2.jar slf4j-
+ api-1.7.36.jar circe-core_2.13-0.14.1.jar httpclient-4.5.13.jar circe-n
+ umbers_2.13-0.14.1.jar circe-generic-extras_2.13-0.14.1.jar logback-cla
+ ssic-1.2.11.jar j2objc-annotations-1.3.jar akka-slf4j_2.13-2.7.0.jar go
+ ogle-http-client-jackson2-1.20.0.jar mongodb-driver-reactivestreams-4.3
+ .3.jar core_2.13-1.3.12.jar akka-actor_2.13-2.7.0.jar httpcore-4.4.15.j
+ ar reactor-core-3.2.22.RELEASE.jar akka-stream_2.13-2.7.0.jar google-ap
+ i-client-1.35.2.jar checker-qual-3.12.0.jar mongo-scala-driver_2.13-4.3
+ .3.jar scala-library-2.13.10.jar scala-reflect-2.13.10.jar bson-4.3.3.j
+ ar mongo-scala-bson_2.13-4.3.3.jar error_prone_annotations-2.11.0.jar a
+ uto-value-annotations-1.10.1.jar google-auth-library-oauth2-http-1.16.0
+ .jar scala-reflect-2.13.4.jar google-oauth-client-java6-1.34.1.jar jaka
+ rta.activation-1.2.1.jar akka-actor-typed_2.13-2.7.0.jar cats-kernel_2.
+ 13-2.6.1.jar core_2.13-3.8.8.jar circe-jawn_2.13-0.14.1.jar logback-cor
+ e-1.2.11.jar jakarta.xml.bind-api-2.3.2.jar opencensus-api-0.31.1.jar c
+ irce-parser_2.13-0.14.1.jar simulacrum-scalafix-annotations_2.13-0.5.4.
+ jar akka-protobuf-v3_2.13-2.7.0.jar gson-2.9.0.jar ws_2.13-1.3.12.jar j
+ etbrains-runtime-annotations-1.0.0.jar scala-parser-combinators_2.13-1.
+ 1.2.jar emailaddress-rfc2822-2.2.0.jar core-module-6.6.1.jar cats-core_
+ 2.13-2.6.1.jar scala-library-2.13.10.jar jakarta.mail-1.6.5.jar commons
+ -codec-1.11.jar google-api-services-youtube-v3-rev222-1.25.0.jar opence
+ nsus-contrib-http-util-0.31.1.jar listenablefuture-9999.0-empty-to-avoi
+ d-conflict-with-guava.jar
 

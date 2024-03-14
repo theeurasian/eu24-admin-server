@@ -83,6 +83,10 @@ object HttpManager extends AppProps{
           NewsManager.publishVideoNewsInTelegram()
           complete(HttpEntity("success"))
         },
+        (get & path("sendToSubscribers")) {
+          NewsManager.publishVideoNewsToSubscribers()
+          complete(HttpEntity("success"))
+        },
         (get & path("posts")) {
           complete(HttpEntity(NewsManager.getPosts.asJson.noSpaces))
         },
@@ -122,6 +126,12 @@ object HttpManager extends AppProps{
         },
         (get & path("CGTNUrls")) {
           complete(HttpEntity(NewsManager.getCGTNUrls.asJson.noSpaces))
+        },
+        (get & path("addSubscriber") & parameter("name", "email")) { (name, email) =>
+          complete(HttpEntity(NewsManager.addSubscriber(name, email).asJson.noSpaces))
+        },
+        (get & path("subscribers")) {
+          complete(HttpEntity(NewsManager.getSubscribers.asJson.noSpaces))
         },
       )
     }

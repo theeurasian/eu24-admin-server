@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="mongo-local" uuid="2e21754f-a035-414a-a566-2d7a73f55a8e">
+    <data-source source="LOCAL" name="remote" uuid="f60ae89c-3d22-4d21-bdc0-3cf83494add6">
       <driver-ref>mongo</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.dbschema.MongoJdbcDriver</jdbc-driver>
       <jdbc-url>mongodb://localhost:27017</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="remote" uuid="f60ae89c-3d22-4d21-bdc0-3cf83494add6">
+    <data-source source="LOCAL" name="@localhost" uuid="74a8c461-c335-45aa-a5ad-d04b31e0a263">
       <driver-ref>mongo</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.dbschema.MongoJdbcDriver</jdbc-driver>

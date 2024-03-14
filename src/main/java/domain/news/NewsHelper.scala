@@ -2,12 +2,15 @@ package domain.news
 
 import domain.AppProps
 import domain.database.DBManager
-import domain.news.NewsManager.{CGTNUrl, ClientStatus, NewsPack, Post, VideoNews, cloudDirectory, getVideoNews, publishVideoNews, restUrl}
+import domain.news.NewsManager.{CGTNUrl, ClientStatus, NewsPack, Post, Subscriber, VideoNews}
 import io.circe.jawn.decode
 import org.mongodb.scala.MongoCollection
 import io.circe.generic.auto._
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Updates._
+import org.simplejavamail.api.mailer.config.TransportStrategy
+import org.simplejavamail.email.EmailBuilder
+import org.simplejavamail.mailer.MailerBuilder
 import sttp.client3.{Request, SimpleHttpClient, UriContext, asStringAlways, basicRequest, multipartFile}
 import sttp.model.Uri
 
@@ -16,6 +19,7 @@ import java.net.{URI, URLEncoder}
 import java.util.{Date, UUID}
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
+import scala.io.{Codec, Source}
 
 trait NewsHelper extends AppProps{
 
@@ -72,7 +76,8 @@ trait NewsHelper extends AppProps{
             val videos: MongoCollection[VideoNews] = mongo.getCollection("video-news")
             Await.result(videos.insertOne(newPost).toFuture(), Duration(50, SECONDS))
             if (post.status == "published" && post.kind.contains("merge")){
-              publishVideoNews(newPost)
+              sendToTelegram(newPost)
+              sendToSubscribers(newPost)
             }
           case _ =>
         }
@@ -123,7 +128,7 @@ trait NewsHelper extends AppProps{
     val response = client.send(request)
     val res = response
   }
-  def publishVideoNews(video: VideoNews): Unit ={
+  def sendToTelegram(video: VideoNews): Unit ={
     val client = SimpleHttpClient()
     val videoUrl = video.url.replace(restUrl + cloudDirectory + "/", "https://eurasian24.ru/watch?url=")
     val text = "Выпуск новостей от " + addLeftZeroes(video.publishDay) + "." + addLeftZeroes(video.publishMonth + 1) + "." + addLeftZeroes(video.publishYear) + " " + videoUrl
@@ -135,6 +140,68 @@ trait NewsHelper extends AppProps{
     val response = client.send(request)
     val res = response
   }
+  def sendToSubscribers(video: VideoNews): Unit ={
+    try{
+      val url = video.url
+      val watchUrl = video.url.replace(restUrl + cloudDirectory + "/", "https://eurasian24.ru/watch?url=")
+      val header = "Выпуск новостей от " + addLeftZeroes(video.publishDay) + "." + addLeftZeroes(video.publishMonth + 1) + "." + addLeftZeroes(video.publishYear)
+      val downloadUrl = video.url.replace("files", "files-download").replace("merge-mobile", header) + "?fileName=merge-mobile.mp4"
+
+      getSubscribers.groupBy(_.email).foreach(group => {
+        try{
+          val html = Source.fromResource("email.html")(Codec.UTF8).mkString.replace("&publish", header).replace("&url", watchUrl).replace("&videoUrl", url).replace("&downloadUrl", downloadUrl)
+          val mailer = MailerBuilder
+            .withSMTPServer("smtp.mail.ru", 465, mailRuLogin, mailRuPass)
+            .withTransportStrategy(TransportStrategy.SMTPS)
+            .withDebugLogging(true)
+            .buildMailer()
+
+          val mail = EmailBuilder.startingBlank()
+            .from("Eurasian 24", mailRuLogin)
+            .to(group._2.head.name, group._1)
+            .withSubject("Eurasian 24 ежедневный выпуск новостей")
+            .withHTMLText(html)
+            .buildEmail()
+
+          mailer.sendMail(mail)
+        }
+        catch {
+          case e: Exception => println(e.toString)
+        }
+      })
+    }
+    catch {
+      case e: Exception => None
+    }
+  }
+  def sendGreetingToSubscribeer(name: String, email: String): Unit ={
+    try{
+      try{
+        val text = "Благодарим Вас за оформление подписки на новостную рассылку Eurasian 24. Раз в день вам будет приходить письмо с видеовыпуском актуальных новостей"
+        val html = Source.fromResource("greetings.html")(Codec.UTF8).mkString.replace("&text", text)
+        val mailer = MailerBuilder
+          .withSMTPServer("smtp.mail.ru", 465, mailRuLogin, mailRuPass)
+          .withTransportStrategy(TransportStrategy.SMTPS)
+          .withDebugLogging(true)
+          .buildMailer()
+
+        val mail = EmailBuilder.startingBlank()
+          .from("Eurasian 24", mailRuLogin)
+          .to(name, email)
+          .withSubject("Eurasian 24 подписка на новостную рассылку оформлена")
+          .withHTMLText(html)
+          .buildEmail()
+
+        mailer.sendMail(mail)
+      }
+      catch {
+        case e: Exception => println(e.toString)
+      }
+    }
+    catch {
+      case e: Exception => None
+    }
+  }
   def addLeftZeroes(in: Int, length: Int = 2): String ={
     var res = in.toString
     while (res.length < length){
@@ -144,20 +211,19 @@ trait NewsHelper extends AppProps{
   }
   def publishVideoNewsInTelegram(): Unit ={
     getVideoNews.find(x => x.status == "published" && x.kind.contains("merge")) match {
-      case Some(value) => publishVideoNews(value)
+      case Some(value) => sendToTelegram(value)
       case _ => None
     }
   }
-  def publishVideoNews(id: String, status: String): Unit ={
-    if (status == "published"){
-      getVideoNews.find(_.id == id) match {
-        case Some(value) =>
-          if (value.kind.contains("merge")){
-            publishVideoNews(value)
-          }
-        case _ => None
-      }
+  def publishVideoNewsToSubscribers(): Unit ={
+    getVideoNews.find(x => x.status == "published" && x.kind.contains("merge")) match {
+      case Some(value) => sendToSubscribers(value)
+      case _ => None
     }
+  }
+  def publishVideoNews(video: VideoNews): Unit ={
+    sendToTelegram(video)
+    sendToSubscribers(video)
   }
   def publishPost(id: String): Unit ={
     getPost(id).take(1).foreach(p => publishPost(p))
@@ -253,6 +319,26 @@ trait NewsHelper extends AppProps{
           case _ => List.empty[CGTNUrl]
         }
       case _ => List.empty[CGTNUrl]
+    }
+  }
+  def addSubscriber(name: String, email: String): String ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val clientStatus: MongoCollection[Subscriber] = mongo.getCollection("subscribers")
+        Await.result(clientStatus.insertOne(Subscriber(name, email)).toFuture(), Duration(50, SECONDS))
+        sendGreetingToSubscribeer(name, email)
+      case _ =>
+    }
+    "success"
+  }
+  def getSubscribers: List[Subscriber] ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        Await.result(mongo.getCollection("subscribers").find[Subscriber]().toFuture(), Duration(50, SECONDS)) match {
+          case subscribers => subscribers.toList
+          case _ => List.empty[Subscriber]
+        }
+      case _ => List.empty[Subscriber]
     }
   }
 }
