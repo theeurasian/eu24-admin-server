@@ -2,6 +2,7 @@ package domain.database
 
 import domain.auth.AuthManager.UserAuth
 import domain.news.NewsManager.{CGTNUrl, ClientStatus, NewsPack, Post, Subscriber, VideoNews}
+import domain.time.TimeManager.Time
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
@@ -34,6 +35,8 @@ object DBManager {
   implicit val SubscriberDecoder: Decoder[Subscriber] = deriveDecoder[Subscriber]
   implicit val SubscriberEncoder: Encoder[Subscriber] = deriveEncoder[Subscriber]
 
+  implicit val TimeDecoder: Decoder[Time] = deriveDecoder[Time]
+  implicit val TimeEncoder: Encoder[Time] = deriveEncoder[Time]
 
   val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[UserAuth],

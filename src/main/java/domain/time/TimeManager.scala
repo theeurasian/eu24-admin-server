@@ -14,6 +14,12 @@ object TimeManager {
   case class Tick() extends TickMessage
   case class TickSubsCheck() extends TickMessage
 
+  case class Time(day: Int, month: Int, year: Int, hours: Int, minutes: Int, seconds: Int)
+  object Time{
+    def fromDate(time: Date): Time = Time(time.getDate, time.getMonth, time.getYear, time.getHours, time.getMinutes, time.getSeconds)
+  }
+
+
   def apply(newsPublisher: ActorRef[NewsManager.NewsManagerMessages]): Behavior[TickMessage] = {
     Behaviors.withTimers(timers => {
       timers.startTimerWithFixedDelay(Tick(), Duration.Zero, Duration(1, SECONDS))

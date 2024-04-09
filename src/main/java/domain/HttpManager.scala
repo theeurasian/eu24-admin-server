@@ -13,6 +13,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import domain.auth.AuthManager.checkAuth
 import domain.news.NewsManager
 import domain.time.TimeManager
+import domain.time.TimeManager.Time
 import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
 import sttp.model.HeaderNames.ContentType
@@ -108,6 +109,9 @@ object HttpManager extends AppProps{
         },
         (get & path("time")) {
           complete(HttpEntity(new Date().getTime.toString.asJson.noSpaces))
+        },
+        (get & path("time-struct")) {
+          complete(HttpEntity(Time.fromDate(new Date()).asJson.noSpaces))
         },
         (get & path("newsPack")) {
           complete(HttpEntity(NewsManager.getVideoNewsPack.asJson.noSpaces))
