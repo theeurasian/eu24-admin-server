@@ -37,8 +37,8 @@ object NewsManager extends NewsHelper {
   case class ClientStatus(client: String, status: String, date: Long)
   case class CGTNUrl(url: String, date: Long)
   case class Subscriber(name: String, email: String)
-
   case class NewsPack(by: String, kz: String, cn: String, ru: String, byAds: List[String], kzAds: List[String], cnAds: List[String], ruAds: List[String], byCaptions: List[String], kzCaptions: List[String], cnCaptions: List[String], ruCaptions: List[String], ins: List[String], byMobile: String, kzMobile: String, cnMobile: String, ruMobile: String, mergeMobile: String, mergeMobileCaptions: List[String])
+  case class Payload(value: String)
 
   val langs: List[String] = List("by", "kz", "cn", "ru")
   val subtitleLangs: List[String] = List("ja", "pt", "es", "ru", "fr", "en", "zh-Hans", "ar", "hi", "kk")

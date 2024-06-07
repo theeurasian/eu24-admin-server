@@ -2,11 +2,11 @@ package domain.news
 
 import domain.AppProps
 import domain.database.DBManager
-import domain.news.NewsManager.{CGTNUrl, ClientStatus, NewsPack, Post, Subscriber, VideoNews}
+import domain.news.NewsManager.{CGTNUrl, ClientStatus, NewsPack, Payload, Post, Subscriber, VideoNews}
 import io.circe.jawn.decode
 import org.mongodb.scala.MongoCollection
 import io.circe.generic.auto._
-import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.Filters.{equal, regex}
 import org.mongodb.scala.model.Updates._
 import org.simplejavamail.api.mailer.config.TransportStrategy
 import org.simplejavamail.email.EmailBuilder
@@ -224,6 +224,7 @@ trait NewsHelper extends AppProps{
   def publishVideoNews(video: VideoNews): Unit ={
     sendToTelegram(video)
     sendToSubscribers(video)
+    sendToPushSubscribers()
   }
   def publishPost(id: String): Unit ={
     getPost(id).take(1).foreach(p => publishPost(p))
@@ -341,4 +342,48 @@ trait NewsHelper extends AppProps{
       case _ => List.empty[Subscriber]
     }
   }
+
+  def addPushSubscriber(payload: String): String ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val clientStatus: MongoCollection[Payload] = mongo.getCollection("push-subscribers")
+        Await.result(clientStatus.insertOne(Payload(payload)).toFuture(), Duration(50, SECONDS))
+      case _ =>
+    }
+    "success"
+  }
+  def deletePushSubscriber(endpoint: String): String ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val clientStatus: MongoCollection[Payload] = mongo.getCollection("push-subscribers")
+        Await.result(clientStatus.deleteOne(regex("value", endpoint)).toFuture(), Duration(50, SECONDS))
+      case _ =>
+    }
+    "success"
+  }
+  def sendPushSubscriber(payload: Payload): Unit ={
+    val client = SimpleHttpClient()
+    val request: Request[String, Any] = basicRequest
+      .response(asStringAlways)
+      .body(payload.value)
+      .post(uri"https://eurasian24.tv/push/roll")
+    val response = client.send(request)
+    val res = response
+  }
+  def getPushSubscribers: List[Payload] ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        Await.result(mongo.getCollection("push-subscribers").find[Payload]().toFuture(), Duration(50, SECONDS)) match {
+          case subscribers => subscribers.toList
+          case _ => List.empty[Payload]
+        }
+      case _ => List.empty[Payload]
+    }
+  }
+  def sendToPushSubscribers(): Unit = {
+    getPushSubscribers.foreach(p => {
+      sendPushSubscriber(p)
+    })
+  }
+
 }

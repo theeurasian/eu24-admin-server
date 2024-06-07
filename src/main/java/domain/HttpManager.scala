@@ -137,6 +137,12 @@ object HttpManager extends AppProps{
         (get & path("subscribers")) {
           complete(HttpEntity(NewsManager.getSubscribers.asJson.noSpaces))
         },
+        (post & path("addPushSubscriber") & entity(as[String])) { (payload) =>
+          complete(HttpEntity(NewsManager.addPushSubscriber(payload)))
+        },
+        (post & path("deletePushSubscriber") & entity(as[String])) { (endpoint) =>
+          complete(HttpEntity(NewsManager.deletePushSubscriber(endpoint)))
+        },
       )
     }
 

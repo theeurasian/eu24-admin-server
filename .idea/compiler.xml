@@ -9,8 +9,5 @@
         <module name="eu24-admin-server" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="eu24-admin-server" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>
