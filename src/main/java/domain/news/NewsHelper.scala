@@ -1,28 +1,55 @@
 package domain.news
 
+import com.google.api.client.auth.oauth2.{Credential, StoredCredential}
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
+import com.google.api.client.googleapis.auth.oauth2.{GoogleAuthorizationCodeFlow, GoogleClientSecrets}
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.util.store.{DataStore, FileDataStoreFactory}
 import domain.AppProps
 import domain.database.DBManager
-import domain.news.NewsManager.{CGTNUrl, ClientStatus, NewsPack, Payload, Post, Subscriber, VideoNews}
+import io.circe.generic.auto._
 import io.circe.jawn.decode
 import org.mongodb.scala.MongoCollection
-import io.circe.generic.auto._
 import org.mongodb.scala.model.Filters.{equal, regex}
 import org.mongodb.scala.model.Updates._
 import org.simplejavamail.api.mailer.config.TransportStrategy
 import org.simplejavamail.email.EmailBuilder
 import org.simplejavamail.mailer.MailerBuilder
 import sttp.client3.{Request, SimpleHttpClient, UriContext, asStringAlways, basicRequest, multipartFile}
-import sttp.model.Uri
 
 import java.io.File
-import java.net.{URI, URLEncoder}
-import java.util.{Date, UUID}
+import java.util.{Calendar, Date, UUID}
+import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.io.{Codec, Source}
 
 trait NewsHelper extends AppProps{
 
+  case class Post(id: String, date: Long, user: String, publishDay: Int, publishMonth: Int, publishYear: Int, publishPeriod: String, header: String, url: String, imageUrl: String, status: String = "new")
+  case class VideoNews(id: String, date: Long, user: String, publishDay: Int, publishMonth: Int, publishYear: Int, publishPeriod: String, kind: String, url: String, youTubeUrl: String, status: String = "new")
+
+  trait NewsManagerMessages
+  case class PublishNews(period: String) extends NewsManagerMessages
+  case class CheckVideoSubs() extends NewsManagerMessages
+  case class AutoRemove() extends NewsManagerMessages
+  case class UpdateClientStatus(client: String, status: String)
+  case class ClientStatus(client: String, status: String, date: Long)
+  case class CGTNUrl(url: String, date: Long)
+  case class Subscriber(name: String, email: String)
+  case class NewsPack(by: String, kz: String, cn: String, ru: String, byAds: List[String], kzAds: List[String], cnAds: List[String], ruAds: List[String], byCaptions: List[String], kzCaptions: List[String], cnCaptions: List[String], ruCaptions: List[String], ins: List[String], byMobile: String, kzMobile: String, cnMobile: String, ruMobile: String, mergeMobile: String, mergeMobileCaptions: List[String])
+  case class Payload(value: String)
+
+  val langs: List[String] = List("by", "kz", "cn", "ru")
+  val subtitleLangs: List[String] = List("ja", "pt", "es", "ru", "fr", "en", "zh-Hans", "ar", "hi", "kk")
+  val CREDENTIALS_DIRECTORY = ".oauth-credentials"
+  val HTTP_TRANSPORT = new NetHttpTransport()
+  val VIDEO_FILE_FORMAT = "video/*"
+  val JSON_FACTORY: JsonFactory = new JacksonFactory()
+  val scopes: List[String] = List("https://www.googleapis.com/auth/youtube.upload")
 
   def getPosts: List[Post] = {
     DBManager.GetMongoConnection() match {
@@ -383,6 +410,76 @@ trait NewsHelper extends AppProps{
   def sendToPushSubscribers(): Unit = {
     getPushSubscribers.foreach(p => {
       sendPushSubscriber(p)
+    })
+  }
+
+  def isToday(pDay: Int, pMonth: Int, pYear: Int): Boolean = {
+    val c = Calendar.getInstance()
+    val day = c.get(Calendar.DATE)
+    val month = c.get(Calendar.MONTH)
+    val year = c.get(Calendar.YEAR)
+    day == pDay && month == pMonth && year == pYear
+  }
+
+
+
+  def authorize(scopes: List[String], credentialDatastore: String): Credential = {
+    val clientSecretReader = Source.fromResource("client_secrets.json").bufferedReader()
+    val clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, clientSecretReader)
+    val fileDataStoreFactory = new FileDataStoreFactory(new File(System.getProperty("user.home") + "/" + CREDENTIALS_DIRECTORY))
+    val datastore: DataStore[StoredCredential] = fileDataStoreFactory.getDataStore(credentialDatastore)
+    val flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, scopes.asJava).setCredentialDataStore(datastore).setAccessType("offline").build
+    val localReceiver = new LocalServerReceiver.Builder().setPort(8080).build
+    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user")
+  }
+
+  def publishNewsAux(period: String): Unit = {
+    val posts = getPosts
+    posts.filter(p => p.publishPeriod == period && isToday(p.publishDay, p.publishMonth, p.publishYear)).foreach(p => {
+      p.status match {
+        case "allow" =>
+          publishPost(p)
+          setPostStatus(p.id, "published")
+        case "deny" =>
+          setPostStatus(p.id, "archive-denied")
+        case _ =>
+          setPostStatus(p.id, "archive-skipped")
+      }
+    })
+    val videoNews = getVideoNews
+    videoNews.filter(p => p.publishPeriod == period && isToday(p.publishDay, p.publishMonth, p.publishYear)).foreach(p => {
+      p.status match {
+        case "allow" =>
+          if (p.kind != "ins" && !p.kind.contains("ad")){
+            videoNews.find(x => x.kind == p.kind && x.status == "published") match {
+              case Some(publishNews) => setNewsStatus(publishNews.id, "archive-published")
+              case _ => None
+            }
+          }
+          setNewsStatus(p.id, "published")
+          if (p.kind.contains("merge")){
+            publishVideoNews(p)
+          }
+        case "deny" =>
+          setNewsStatus(p.id, "archive-denied")
+        case _ =>
+          setNewsStatus(p.id, "archive-skipped")
+      }
+    })
+  }
+  def publishNews(): Unit = {
+    val videoNews = getVideoNews
+    videoNews.filter(_.status == "allow").foreach(p => {
+      if (p.kind != "ins" && !p.kind.contains("ad")){
+        videoNews.find(x => x.kind == p.kind && x.status == "published") match {
+          case Some(publishNews) => setNewsStatus(publishNews.id, "archive-published")
+          case _ => None
+        }
+      }
+      setNewsStatus(p.id, "published")
+      if (p.kind.contains("merge")){
+        publishVideoNews(p)
+      }
     })
   }
 

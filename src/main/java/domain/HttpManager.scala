@@ -16,7 +16,6 @@ import domain.time.TimeManager
 import domain.time.TimeManager.Time
 import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
-import sttp.model.HeaderNames.ContentType
 
 import java.io.File
 import java.util.{Date, UUID}
@@ -86,6 +85,10 @@ object HttpManager extends AppProps{
         },
         (get & path("sendToSubscribers")) {
           NewsManager.publishVideoNewsToSubscribers()
+          complete(HttpEntity("success"))
+        },
+        (get & path("publishNews")) {
+          NewsManager.publishNews()
           complete(HttpEntity("success"))
         },
         (get & path("posts")) {
